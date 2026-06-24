@@ -1,5 +1,5 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -13,6 +13,42 @@ import Contact from './pages/Contact';
 import Admin from './pages/Admin';
 import useAnimations from './hooks/useAnimations';
 import { LanguageProvider } from './context/LanguageContext';
+
+// Scroll-to-top + progress bar wrapper
+function ScrollFeatures() {
+  const [showTop, setShowTop] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const { pathname } = useLocation();
+
+  // Scroll to top on route change
+  useEffect(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, [pathname]);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      setProgress(docHeight > 0 ? (scrollTop / docHeight) * 100 : 0);
+      setShowTop(scrollTop > 400);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  return (
+    <>
+      {/* Reading progress bar */}
+      <div className="reading-progress" style={{ width: `${progress}%` }} />
+      {/* Back-to-top button */}
+      <button
+        className={`scroll-top-btn ${showTop ? 'visible' : ''}`}
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        aria-label="Back to top"
+      >
+        <i className="fas fa-chevron-up"></i>
+      </button>
+    </>
+  );
+}
 
 function AppContent() {
   useAnimations();
@@ -57,6 +93,7 @@ function AppContent() {
         <div className="grid-mesh"></div>
       </div>
       
+      <ScrollFeatures />
       <Navbar />
       <main className="flex-grow-1 position-relative z-1">
         <Routes>

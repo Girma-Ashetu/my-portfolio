@@ -1,11 +1,18 @@
 import { Link, useLocation } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 
 function Navbar() {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { language, setLanguage, t } = useLanguage();
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
   
   const isActive = (path) => location.pathname === path ? 'active' : '';
 
@@ -17,7 +24,7 @@ function Navbar() {
   ];
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark fixed-top glass-navbar">
+    <nav className={`navbar navbar-expand-lg navbar-dark fixed-top glass-navbar${scrolled ? ' scrolled' : ''}`}>
       <div className="container">
         <Link className="navbar-brand fs-3 fw-bold d-flex align-items-center gap-3" to="/" onClick={() => setIsOpen(false)}>
           <div className="nav-avatar-wrapper">
@@ -44,10 +51,9 @@ function Navbar() {
             ))}
             <li className="nav-item ms-lg-3 mt-3 mt-lg-0">
               <select 
-                className="form-select form-select-sm bg-dark text-white border-secondary"
+                className="lang-select"
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-                style={{ width: '100px', borderRadius: '12px' }}
               >
                 <option value="en">English</option>
                 <option value="am">አማርኛ</option>

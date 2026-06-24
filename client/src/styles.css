@@ -2496,3 +2496,243 @@ img.img-fluid[src] {
 html {
     scroll-behavior: smooth;
 }
+
+/* =========================================
+   PROFESSIONAL PORTFOLIO POLISH v2
+   ========================================= */
+
+/* ── Reading Progress Bar ── */
+.reading-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+    background-size: 200% 100%;
+    animation: shimmer-line 3s linear infinite;
+    z-index: 9999;
+    border-radius: 0 2px 2px 0;
+    box-shadow: 0 0 12px var(--primary-glow);
+    transition: width 0.1s linear;
+}
+
+/* ── Scroll-to-Top Button ── */
+.scroll-top-btn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: var(--bg-deep);
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(20px) scale(0.8);
+    transition: opacity 0.4s var(--easing), transform 0.4s var(--easing);
+    box-shadow: 0 4px 20px var(--primary-glow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.scroll-top-btn.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.scroll-top-btn:hover {
+    transform: translateY(-4px) scale(1.1) !important;
+    box-shadow: 0 8px 30px var(--primary-glow);
+}
+
+.scroll-top-btn:active {
+    transform: scale(0.95) !important;
+}
+
+/* ── Page Enter Fade-in ── */
+main > * {
+    animation: page-fade-in 0.5s var(--easing) both;
+}
+
+@keyframes page-fade-in {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Premium Input Polish ── */
+.premium-input {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 12px !important;
+    color: #fff !important;
+    padding: 14px 18px !important;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease !important;
+    font-size: 0.95rem !important;
+}
+
+.premium-input::placeholder {
+    color: rgba(255, 255, 255, 0.25) !important;
+}
+
+.premium-input:focus {
+    background: rgba(255, 255, 255, 0.07) !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px var(--primary-glow) !important;
+    outline: none !important;
+}
+
+/* ── Footer Nav Link Hover ── */
+.footer-nav-link {
+    transition: color 0.3s ease, transform 0.3s ease;
+    display: inline-block;
+}
+
+.footer-nav-link:hover {
+    color: var(--primary) !important;
+    transform: translateX(6px);
+}
+
+/* ── Accessibility: Focus Ring ── */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+
+/* ── Language Selector Improved ── */
+.lang-select {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 12px !important;
+    color: #fff !important;
+    font-size: 0.8rem !important;
+    padding: 0.35rem 0.7rem !important;
+    cursor: pointer;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+.lang-select:focus,
+.lang-select:hover {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px var(--primary-glow) !important;
+    outline: none !important;
+}
+
+.lang-select option {
+    background: #0f172a;
+    color: #fff;
+}
+
+/* ── Section Separator Line ── */
+.section-sep {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
+    margin: 4rem 0;
+}
+
+/* ── Bento Item Micro-animation ── */
+.bento-item {
+    transition: transform 0.4s var(--easing), box-shadow 0.4s var(--easing), border-color 0.4s ease;
+}
+
+.bento-item:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 0 20px rgba(94, 234, 212, 0.08);
+    border-color: rgba(94, 234, 212, 0.25) !important;
+}
+
+/* ── Hero Scroll Indicator ── */
+.hero-scroll-indicator {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0.5;
+    animation: fade-breathe 3s ease-in-out infinite;
+}
+
+@keyframes fade-breathe {
+    0%, 100% { opacity: 0.35; }
+    50%       { opacity: 0.75; }
+}
+
+/* ── Contact AI Chat Box ── */
+.ai-chat-box {
+    background: rgba(15, 23, 42, 0.7) !important;
+    border: 1px solid rgba(94, 234, 212, 0.15) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 0 30px rgba(94, 234, 212, 0.05);
+}
+
+/* ── Ping Animation for AI Orb ── */
+@keyframes ping {
+    0%   { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+    100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+}
+
+/* ── Stat Accent Bar ── */
+.stat-accent {
+    height: 3px;
+    border-radius: 3px;
+    margin-top: 1rem;
+    opacity: 0.6;
+}
+
+/* ── Hover Glow utility ── */
+.hover-glow:hover {
+    text-shadow: 0 0 12px currentColor;
+}
+
+/* ── Contact Info Icon Hover ── */
+.contact-info-icon {
+    transition: transform 0.35s var(--easing), box-shadow 0.35s ease !important;
+}
+
+.contact-info-icon:hover,
+.group:hover .contact-info-icon {
+    transform: scale(1.12) rotate(6deg) !important;
+    box-shadow: 0 0 20px var(--primary-glow) !important;
+}
+
+/* ── Reveal Up Animation ── */
+.reveal-up {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s var(--easing), transform 0.7s var(--easing);
+}
+
+.reveal-up.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ── Mobile Responsiveness Enhancements ── */
+@media (max-width: 768px) {
+    .scroll-top-btn {
+        width: 42px;
+        height: 42px;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        font-size: 0.85rem;
+    }
+
+    .hero-scroll-indicator {
+        display: none;
+    }
+
+    .reading-progress {
+        height: 2px;
+    }
+}
