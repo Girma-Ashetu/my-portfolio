@@ -12,7 +12,7 @@ function Admin() {
   const [isAddingProject, setIsAddingProject] = useState(false);
   
   const [newProject, setNewProject] = useState({
-    title: '', description: '', technologies: '', link: '', image_url: ''
+    title: '', description: '', long_description: '', technologies: '', link: '', image_url: ''
   });
 
   const fetchAdminData = () => {
@@ -56,7 +56,7 @@ function Admin() {
       await axios.post('/api/admin/projects', newProject, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
-      setNewProject({ title: '', description: '', technologies: '', link: '', image_url: '' });
+      setNewProject({ title: '', description: '', long_description: '', technologies: '', link: '', image_url: '' });
       setIsAddingProject(false);
       fetchAdminData();
     } catch (err) {
@@ -251,8 +251,12 @@ function Admin() {
                       <input type="text" className="form-control premium-input" required value={newProject.link} onChange={e => setNewProject({...newProject, link: e.target.value})} />
                     </div>
                     <div className="col-12">
-                      <label className="text-muted small mb-1">Description</label>
-                      <textarea className="form-control premium-input" rows="4" required value={newProject.description} onChange={e => setNewProject({...newProject, description: e.target.value})}></textarea>
+                      <label className="text-muted small mb-1">Short Description (Card)</label>
+                      <textarea className="form-control premium-input" rows="2" required value={newProject.description} onChange={e => setNewProject({...newProject, description: e.target.value})}></textarea>
+                    </div>
+                    <div className="col-12">
+                      <label className="text-muted small mb-1">Long Description (Modal)</label>
+                      <textarea className="form-control premium-input" rows="4" required value={newProject.long_description} onChange={e => setNewProject({...newProject, long_description: e.target.value})}></textarea>
                     </div>
                   </div>
                   <div className="mt-4 d-flex justify-content-end gap-3">

@@ -1,4 +1,39 @@
-import React from 'react';
+import React, { useRef } from 'react';
+import './skills.css';
+
+/* ── Tilt Card Wrapper ── */
+function TiltCard({ children, className, style }) {
+  const cardRef = useRef(null);
+
+  const handleMouseMove = (e) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const rotateX = ((y - centerY) / centerY) * -5;
+    const rotateY = ((x - centerX) / centerX) * 5;
+    cardRef.current.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+  };
+
+  const handleMouseLeave = () => {
+    if (!cardRef.current) return;
+    cardRef.current.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+  };
+
+  return (
+    <div
+      ref={cardRef}
+      className={`tilt-card-wrapper ${className || ''}`}
+      style={style}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
+      {children}
+    </div>
+  );
+}
 
 const skillCategories = [
   {
@@ -11,43 +46,43 @@ const skillCategories = [
     title: 'Front-End Development',
     icon: 'fa-desktop',
     color: 'secondary',
-    skills: ['React.js', 'Next.js', 'Bootstrap', 'Tailwind CSS', 'Responsive Design', 'UI/UX Principles'],
+    skills: ['React.js', 'Next.js', 'Bootstrap', 'Tailwind CSS', 'Responsive Design'],
   },
   {
     title: 'Back-End Development',
     icon: 'fa-server',
     color: 'info',
-    skills: ['Node.js', 'Express.js', 'REST APIs', 'Authentication Systems', 'Database Integration', 'Server-Side Dev'],
+    skills: ['Node.js', 'Express.js', 'REST APIs', 'Auth Systems', 'Microservices'],
   },
   {
     title: 'Mobile Development',
     icon: 'fa-mobile-alt',
     color: 'accent',
-    skills: ['Flutter', 'React Native', 'Android Development', 'Firebase', 'Cross-Platform Dev'],
+    skills: ['Flutter', 'React Native', 'Android', 'Firebase', 'Cross-Platform'],
   },
   {
     title: 'Database Technologies',
     icon: 'fa-database',
     color: 'primary',
-    skills: ['MySQL', 'PostgreSQL', 'MongoDB', 'Database Design', 'SQL Optimization', 'Data Modeling'],
+    skills: ['MySQL', 'PostgreSQL', 'MongoDB', 'Data Modeling', 'Optimization'],
   },
   {
     title: 'Cloud Computing',
     icon: 'fa-cloud',
     color: 'secondary',
-    skills: ['Amazon Web Services (AWS)', 'Microsoft Azure', 'Cloud Storage', 'Virtual Machines', 'IAM', 'Serverless Computing'],
+    skills: ['AWS', 'Microsoft Azure', 'Cloud Storage', 'EC2', 'Serverless'],
   },
   {
     title: 'Cybersecurity',
     icon: 'fa-shield-alt',
     color: 'accent',
-    skills: ['Network Security', 'Web App Security', 'Authentication & Authorization', 'OWASP Top 10', 'Secure Coding', 'Vulnerability Assessment'],
+    skills: ['Network Security', 'OWASP Top 10', 'Web App Sec', 'Secure Coding'],
   },
   {
     title: 'Development Tools',
     icon: 'fa-tools',
-    color: 'info',
-    skills: ['Git', 'GitHub', 'Docker', 'Linux', 'VS Code', 'IntelliJ IDEA', 'Postman', 'Figma'],
+    color: 'warning',
+    skills: ['Git', 'GitHub Actions', 'Docker', 'Linux', 'Postman', 'Figma'],
   },
 ];
 
@@ -55,53 +90,76 @@ const softSkills = ['Problem Solving', 'Critical Thinking', 'Continuous Learning
 
 function Skills() {
   return (
-    <section className="py-10 mt-5 pt-5 min-vh-100">
-      <div className="container py-5">
-        <div className="text-center mb-5 reveal">
-          <h6 className="text-primary uppercase tracking-widest mb-3" style={{ letterSpacing: '4px' }}>Technical Competencies</h6>
-          <h2 className="display-4 fw-bold mb-3">Skills & <span className="text-primary">Expertise</span></h2>
-          <p className="text-muted fs-5 mx-auto" style={{ maxWidth: '600px' }}>
-            A comprehensive multi-stack skillset built through academic study, hands-on projects, and continuous self-development.
-          </p>
+    <section className="skills-master-section">
+        {/* Deep Space Background */}
+        <div className="skills-bg-aurora">
+            <div className="skills-aurora-1"></div>
+            <div className="skills-aurora-2"></div>
         </div>
+        <div className="skills-bg-grid"></div>
 
-        {/* Technical Skills Grid */}
-        <div className="row g-4 mb-5">
-          {skillCategories.map((cat, i) => (
-            <div key={i} className="col-lg-6 col-xl-3 reveal-up">
-              <div className={`glass-pane p-4 h-100 bento-item border-top border-3 border-${cat.color}`}>
-                <h5 className="text-white fw-bold mb-4">
-                  <i className={`fas ${cat.icon} text-${cat.color} me-2`}></i>
-                  {cat.title}
-                </h5>
-                <div className="d-flex flex-wrap gap-2">
-                  {cat.skills.map((skill, si) => (
-                    <span
-                      key={si}
-                      className={`badge bg-${cat.color} bg-opacity-25 text-${cat.color} border border-${cat.color} px-3 py-2`}
-                    >
-                      {skill}
-                    </span>
-                  ))}
+        <div className="container relative-z">
+            {/* Master Header */}
+            <div className="skills-header reveal">
+                <div className="skills-core-icon">
+                    <div className="core-ring-1"></div>
+                    <div className="core-ring-2"></div>
+                    <i className="fas fa-brain"></i>
                 </div>
-              </div>
+                <span className="skills-chip">Technical Competencies</span>
+                <h2 className="skills-title">
+                    Skills & <span className="text-gradient">Expertise</span>
+                </h2>
+                <p className="skills-sub">
+                    A comprehensive multi-stack skillset built through rigorous academic study, hands-on production projects, and continuous self-development.
+                </p>
             </div>
-          ))}
-        </div>
 
-        {/* Soft Skills */}
-        <div className="glass-pane p-5 reveal-up">
-          <h4 className="text-white fw-bold mb-4"><i className="fas fa-users text-primary me-3"></i>Soft Skills & Personal Strengths</h4>
-          <div className="d-flex flex-wrap gap-3">
-            {softSkills.map((s, i) => (
-              <div key={i} className="glass-pane px-4 py-3 bento-item d-flex align-items-center gap-3">
-                <i className="fas fa-check-circle text-primary"></i>
-                <span className="text-white fw-semibold">{s}</span>
-              </div>
-            ))}
-          </div>
+            {/* Technical Skills Bento Grid */}
+            <div className="skills-bento-grid reveal-up">
+                {skillCategories.map((cat, i) => (
+                    <TiltCard key={i}>
+                        <div className={`skill-card-master color-${cat.color}`} style={{ animationDelay: `${i * 0.1}s` }}>
+                            <div className="skill-card-glow"></div>
+                            <div className="skill-card-header">
+                                <div className="skill-icon-shield">
+                                    <i className={`fas ${cat.icon}`}></i>
+                                </div>
+                                <h4>{cat.title}</h4>
+                            </div>
+                            <div className="skill-tags-container">
+                                {cat.skills.map((skill, si) => (
+                                    <span key={si} className="skill-tag">
+                                        {skill}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    </TiltCard>
+                ))}
+            </div>
+
+            {/* Soft Skills Section */}
+            <div className="soft-skills-container reveal-up" style={{ transitionDelay: '0.4s' }}>
+                <TiltCard>
+                    <div className="soft-skills-master">
+                        <div className="soft-skills-glow"></div>
+                        <div className="soft-header">
+                            <div className="soft-icon"><i className="fas fa-users"></i></div>
+                            <h3>Soft Skills & Personal Strengths</h3>
+                        </div>
+                        <div className="soft-skills-grid">
+                            {softSkills.map((s, i) => (
+                                <div key={i} className="soft-skill-item" style={{ animationDelay: `${i * 0.05}s` }}>
+                                    <i className="fas fa-check-circle"></i>
+                                    <span>{s}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </TiltCard>
+            </div>
         </div>
-      </div>
     </section>
   );
 }

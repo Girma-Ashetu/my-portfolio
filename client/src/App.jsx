@@ -13,6 +13,7 @@ import Contact from './pages/Contact';
 import Admin from './pages/Admin';
 import useAnimations from './hooks/useAnimations';
 import { LanguageProvider } from './context/LanguageContext';
+import AiChatbot from './components/AiChatbot';
 
 // Scroll-to-top + progress bar wrapper
 function ScrollFeatures() {
@@ -109,6 +110,7 @@ function AppContent() {
         </Routes>
       </main>
       <Footer />
+      <AiChatbot />
     </div>
   );
 }

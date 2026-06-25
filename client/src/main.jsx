@@ -4,6 +4,7 @@ import App from './App.jsx'
 import './styles.css'
 import './overhaul.css'
 import './premium.css'
+import './home.css'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

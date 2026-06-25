@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
+import './navbar.css';
 
 function Navbar() {
   const location = useLocation();
@@ -9,7 +10,7 @@ function Navbar() {
   const { language, setLanguage, t } = useLanguage();
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 50);
+    const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
@@ -17,50 +18,50 @@ function Navbar() {
   const isActive = (path) => location.pathname === path ? 'active' : '';
 
   const navLinks = [
-    { to: '/',        label: t('nav', 'home') },
-    { to: '/about',   label: t('nav', 'about') },
-    { to: '/projects',label: t('nav', 'projects') },
-    { to: '/contact', label: t('nav', 'contact') },
+    { to: '/',        label: t('nav', 'home') || 'Home' },
+    { to: '/about',   label: t('nav', 'about') || 'About' },
+    { to: '/projects',label: t('nav', 'projects') || 'Projects' },
+    { to: '/contact', label: t('nav', 'contact') || 'Contact' },
   ];
 
   return (
-    <nav className={`navbar navbar-expand-lg navbar-dark fixed-top glass-navbar${scrolled ? ' scrolled' : ''}`}>
-      <div className="container">
-        <Link className="navbar-brand fs-3 fw-bold d-flex align-items-center gap-3" to="/" onClick={() => setIsOpen(false)}>
-          <div className="nav-avatar-wrapper">
-            <img src="/about_profile.jpg" alt="Girma" className="navbar-avatar" />
-            <div className="avatar-ring"></div>
+    <nav className={`master-navbar ${scrolled ? 'scrolled' : ''}`}>
+      <div className="master-nav-container">
+        <Link className="master-brand" to="/" onClick={() => setIsOpen(false)}>
+          <div className="master-avatar-wrap">
+            <img src="/about_profile.jpg" alt="Girma" />
+            <div className="master-avatar-ring"></div>
           </div>
-          <span className="brand-text">Girma<span className="text-primary">.</span></span>
+          <span className="master-brand-text">Girma<span className="master-brand-dot">.</span></span>
         </Link>
-        <button className="navbar-toggler border-0" type="button" onClick={() => setIsOpen(!isOpen)}>
-          <span className="navbar-toggler-icon"></span>
+        
+        <button className="master-menu-toggle" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle navigation">
+          <i className={`fas ${isOpen ? 'fa-times' : 'fa-bars'}`}></i>
         </button>
-        <div className={`collapse navbar-collapse ${isOpen ? 'show' : ''}`}>
-          <ul className="navbar-nav ms-auto fs-6 gap-lg-2 align-items-lg-center">
-            {navLinks.map(link => (
-              <li key={link.to} className="nav-item">
-                <Link
-                  className={`nav-link px-3 ${isActive(link.to)}`}
-                  to={link.to}
-                  onClick={() => setIsOpen(false)}
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-            <li className="nav-item ms-lg-3 mt-3 mt-lg-0">
-              <select 
-                className="lang-select"
+
+        <div className={`master-nav-links ${isOpen ? 'open' : ''}`}>
+          {navLinks.map(link => (
+            <Link
+              key={link.to}
+              className={`master-nav-link ${isActive(link.to)}`}
+              to={link.to}
+              onClick={() => setIsOpen(false)}
+            >
+              {link.label}
+            </Link>
+          ))}
+          
+          <div className="master-lang-wrap">
+            <select 
+                className="master-lang-select"
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-              >
+            >
                 <option value="en">English</option>
                 <option value="am">አማርኛ</option>
                 <option value="om">Oromoo</option>
-              </select>
-            </li>
-          </ul>
+            </select>
+          </div>
         </div>
       </div>
     </nav>

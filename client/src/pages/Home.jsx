@@ -1,261 +1,433 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-
 import { useLanguage } from '../context/LanguageContext';
 
-function Home() {
+/* ── Animated counter hook ── */
+function useCounter(target, duration = 2000, start = false) {
+  const [val, setVal] = useState(0);
+  useEffect(() => {
+    if (!start) return;
+    const num = parseInt(target);
+    if (isNaN(num)) { setVal(target); return; }
+    let startTime = null;
+    const step = (ts) => {
+      if (!startTime) startTime = ts;
+      const p = Math.min((ts - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setVal(Math.floor(eased * num));
+      if (p < 1) requestAnimationFrame(step);
+      else setVal(target);
+    };
+    requestAnimationFrame(step);
+  }, [start, target, duration]);
+  return val;
+}
+
+/* ── Single stat card ── */
+function StatCard({ val, label, icon, color, index }) {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+  const animated = useCounter(val, 1800, visible);
+
+  useEffect(() => {
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setVisible(true); }, { threshold: 0.4 });
+    if (ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <div ref={ref} className="stat-card reveal-up" style={{ animationDelay: `${index * 0.15}s` }}>
+      <div className="stat-card-glow" style={{ '--glow-color': `var(--${color})` }} />
+      <div className="stat-card-border" style={{ '--glow-color': `var(--${color})` }} />
+      <div className="stat-icon-wrap" style={{ color: `var(--${color})` }}>
+        <i className={`fas ${icon}`} />
+      </div>
+      <div className="stat-number" style={{ color: `var(--${color})` }}>{animated}</div>
+      <div className="stat-label">{label}</div>
+    </div>
+  );
+}
+
+/* ── Skill pill ── */
+function SkillPill({ skill, color, delay }) {
+  return (
+    <span className="skill-pill" style={{ '--pill-color': `var(--${color})`, animationDelay: delay }}>
+      {skill}
+    </span>
+  );
+}
+
+/* ── Tilt Card Wrapper ── */
+function TiltCard({ children, className, style }) {
+  const cardRef = useRef(null);
+
+  const handleMouseMove = (e) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const rotateX = ((y - centerY) / centerY) * -10;
+    const rotateY = ((x - centerX) / centerX) * 10;
+
+    cardRef.current.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+  };
+
+  const handleMouseLeave = () => {
+    if (!cardRef.current) return;
+    cardRef.current.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+  };
+
+  return (
+    <div
+      ref={cardRef}
+      className={`tilt-card-wrapper ${className || ''}`}
+      style={style}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
+      {children}
+    </div>
+  );
+}
+
+export default function Home() {
   const { t, language } = useLanguage();
   const typingRef = useRef(null);
+  const heroRef = useRef(null);
+  const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
 
-  /* ── DATA ── */
-  const focusAreas = [
-    { icon: 'fa-globe',      label: t('focus', 'web') || 'Full-Stack Web Development',    color: 'primary'   },
-    { icon: 'fa-mobile-alt', label: t('focus', 'mobile') || 'Mobile App Development',        color: 'secondary' },
-    { icon: 'fa-shield-alt', label: t('focus', 'cyber') || 'Cybersecurity',                 color: 'accent'    },
-    { icon: 'fa-cloud',      label: t('focus', 'cloud') || 'Cloud Computing',               color: 'info'      },
-    { icon: 'fa-code',       label: t('focus', 'software') || 'Software Engineering',          color: 'primary'   },
-    { icon: 'fa-database',   label: t('focus', 'db') || 'Database Systems',              color: 'secondary' },
-  ];
+  /* ── Parallax on hero ── */
+  useEffect(() => {
+    const hero = heroRef.current;
+    if (!hero) return;
+    const move = (e) => {
+      const rect = hero.getBoundingClientRect();
+      setMousePos({
+        x: (e.clientX - rect.left) / rect.width,
+        y: (e.clientY - rect.top) / rect.height,
+      });
+    };
+    hero.addEventListener('mousemove', move);
+    return () => hero.removeEventListener('mousemove', move);
+  }, []);
 
-  const skillCategories = [
-    { title: t('skills', 'lang') || 'Programming Languages', icon: 'fa-terminal',   color: 'primary',   skills: ['Java','JavaScript','Python','C++','SQL','HTML5','CSS3'] },
-    { title: t('skills', 'front') || 'Front-End Development', icon: 'fa-desktop',    color: 'secondary', skills: ['React.js','Next.js','Bootstrap','Tailwind CSS','Responsive Design'] },
-    { title: t('skills', 'back') || 'Back-End Development',  icon: 'fa-server',     color: 'info',      skills: ['Node.js','Express.js','REST APIs','Authentication','Database Integration'] },
-    { title: t('skills', 'mobile') || 'Mobile Development',    icon: 'fa-mobile-alt', color: 'accent',    skills: ['Flutter','React Native','Android Dev','Firebase','Cross-Platform'] },
-    { title: t('skills', 'cloud') || 'Cloud Computing',       icon: 'fa-cloud',      color: 'primary',   skills: ['AWS','Microsoft Azure','Cloud Storage','IAM','Serverless'] },
-    { title: t('skills', 'cyber') || 'Cybersecurity',         icon: 'fa-shield-alt', color: 'accent',    skills: ['Network Security','OWASP Top 10','Secure Coding','Vulnerability Assessment'] },
-    { title: t('skills', 'db') || 'Database Technologies', icon: 'fa-database',   color: 'secondary', skills: ['MySQL','PostgreSQL','MongoDB','Database Design','SQL Optimization'] },
-    { title: t('skills', 'tools') || 'Dev Tools',             icon: 'fa-tools',      color: 'info',      skills: ['Git','GitHub','Docker','Linux','VS Code','Postman','Figma'] },
-  ];
-
-  const softSkills = ['Problem Solving','Critical Thinking','Continuous Learning','Team Collaboration','Leadership','Adaptability','Communication','Analytical Thinking'];
-
-  const experiences = [
-    {
-      title: t('exp', 't1') || 'Academic Software Development', org: t('exp', 'o1') || 'Jimma Institute of Technology', period: '2022 – Present', color: 'primary', icon: 'fa-graduation-cap',
-      points: [
-        t('exp', 'p1a') || 'Designed and developed multiple academic projects — desktop apps, web apps, and cloud-based solutions.',
-        t('exp', 'p1b') || 'Applied OOP, data structures, and software engineering principles to real-world problems.',
-        t('exp', 'p1c') || 'Gained hands-on experience with database design, API development, and system architecture.',
-      ],
-    },
-    {
-      title: t('exp', 't2') || 'Team-Based Development', org: t('exp', 'o2') || 'University Group Projects', period: '2023 – Present', color: 'secondary', icon: 'fa-users',
-      points: [
-        t('exp', 'p2a') || 'Collaborated with peers to analyze requirements, design architectures, and implement solutions.',
-        t('exp', 'p2b') || 'Led feature development using Git and GitHub for version control.',
-        t('exp', 'p2c') || 'Practiced Agile methodologies and iterative development cycles.',
-      ],
-    },
-    {
-      title: t('exp', 't3') || 'Technical Research & Self-Learning', org: t('exp', 'o3') || 'Independent Study', period: '2022 – Present', color: 'accent', icon: 'fa-book-open',
-      points: [
-        t('exp', 'p3a') || 'In-depth research on cloud computing, cybersecurity, software engineering, and emerging tech.',
-        t('exp', 'p3b') || 'Completed online courses, lab exercises, and technical documentation.',
-        t('exp', 'p3c') || 'Actively pursuing industry certifications to validate practical knowledge.',
-      ],
-    },
-    {
-      title: t('exp', 't4') || 'Open Source & Freelance Work', org: t('exp', 'o4') || 'Personal & Freelance Projects', period: '2024 – Present', color: 'info', icon: 'fa-laptop-code',
-      points: [
-        t('exp', 'p4a') || 'Built responsive web applications and desktop tools for various use cases.',
-        t('exp', 'p4b') || 'Maintained professional GitHub repositories with clean documentation.',
-        t('exp', 'p4c') || 'Continuously improving through open-source contribution and real-client feedback.',
-      ],
-    },
-  ];
-
-  const certs = [
-    { title: 'AWS Certified Cloud Practitioner',          org: 'Amazon Web Services', icon: 'fa-cloud',      color: 'primary',   status: t('certStatus', 'progress') || 'In Progress' },
-    { title: 'Azure Fundamentals (AZ-900)',               org: 'Microsoft',           icon: 'fa-microsoft',  color: 'info',      status: t('certStatus', 'progress') || 'In Progress' },
-    { title: 'Cisco CCNA',                                org: 'Cisco',               icon: 'fa-network-wired',color:'secondary', status: t('certStatus', 'targeted') || 'Targeted'    },
-    { title: 'Google Cybersecurity Certificate',          org: 'Google',              icon: 'fa-shield-alt', color: 'accent',    status: t('certStatus', 'progress') || 'In Progress' },
-    { title: 'Meta Front-End Developer',                  org: 'Meta',                icon: 'fa-code',       color: 'primary',   status: t('certStatus', 'targeted') || 'Targeted'    },
-    { title: 'Meta Back-End Developer',                   org: 'Meta',                icon: 'fa-server',     color: 'secondary', status: t('certStatus', 'targeted') || 'Targeted'    },
-  ];
-
-  const achievementStats = [
-    { val: '10+', label: t('stats', 'projects') || 'Projects Completed',       icon: 'fa-project-diagram', color: 'primary'   },
-    { val: '500+',label: t('stats', 'github') || 'GitHub Contributions',     icon: 'fa-code-branch',     color: 'secondary' },
-    { val: '3+',  label: t('stats', 'stacks') || 'Major Tech Stacks',        icon: 'fa-layer-group',     color: 'accent'    },
-    { val: '6+',  label: t('stats', 'certs') || 'Certifications Pursued',   icon: 'fa-certificate',     color: 'info'      },
-  ];
-
-  const academic = [
-    t('academic','oop'), t('academic','dsa'), t('academic','db'),
-    t('academic','se'), t('academic','net'), t('academic','os')
-  ];
-  const technical = [
-    t('technical','t1'), t('technical','t2'), t('technical','t3'),
-    t('technical','t4'), t('technical','t5'), t('technical','t6')
-  ];
-
+  /* ── Typing effect ── */
   useEffect(() => {
     const target = typingRef.current;
     if (!target) return;
     const phrases = [
-      t('typingPhrases','p1') || 'Full-Stack Web Developer',
-      t('typingPhrases','p2') || 'Mobile App Developer',
-      t('typingPhrases','p3') || 'Cybersecurity Enthusiast',
-      t('typingPhrases','p4') || 'Cloud Computing Enthusiast'
+      t('typingPhrases', 'p1') || 'Full-Stack Web Developer',
+      t('typingPhrases', 'p2') || 'Mobile App Developer',
+      t('typingPhrases', 'p3') || 'Cybersecurity Enthusiast',
+      t('typingPhrases', 'p4') || 'Cloud Computing Enthusiast',
     ];
-    let phraseIdx = 0, charIdx = 0, isDeleting = false, timer;
+    let idx = 0, char = 0, deleting = false, timer;
     const type = () => {
-      const phrase = phrases[phraseIdx];
-      target.textContent = phrase.substring(0, charIdx);
-      let speed = isDeleting ? 45 : 95;
-      if (!isDeleting && charIdx === phrase.length) { speed = 2200; isDeleting = true; }
-      else if (isDeleting && charIdx === 0) { isDeleting = false; phraseIdx = (phraseIdx + 1) % phrases.length; speed = 400; }
-      charIdx = isDeleting ? charIdx - 1 : charIdx + 1;
+      const phrase = phrases[idx];
+      target.textContent = phrase.substring(0, char);
+      let speed = deleting ? 40 : 90;
+      if (!deleting && char === phrase.length) { speed = 2500; deleting = true; }
+      else if (deleting && char === 0) { deleting = false; idx = (idx + 1) % phrases.length; speed = 400; }
+      char = deleting ? char - 1 : char + 1;
       timer = setTimeout(type, speed);
     };
     type();
     return () => clearTimeout(timer);
   }, [language]);
 
+  /* ── DATA ── */
+  const stats = [
+    { val: '10+', label: t('stats', 'projects') || 'Projects Completed',     icon: 'fa-project-diagram', color: 'primary'   },
+    { val: '500+',label: t('stats', 'github')   || 'GitHub Contributions',   icon: 'fa-code-branch',     color: 'secondary' },
+    { val: '3+',  label: t('stats', 'stacks')   || 'Major Tech Stacks',      icon: 'fa-layer-group',     color: 'accent'    },
+    { val: '6+',  label: t('stats', 'certs')    || 'Certifications Pursued', icon: 'fa-certificate',     color: 'info'      },
+  ];
+
+  const focusAreas = [
+    { icon: 'fa-globe',      label: t('focus','web')      || 'Full-Stack Web Development',   color: 'primary',   desc: 'React, Node.js, REST APIs, GraphQL, and modern web architectures.' },
+    { icon: 'fa-mobile-alt', label: t('focus','mobile')   || 'Mobile App Development',       color: 'secondary', desc: 'Cross-platform solutions using Flutter, React Native, and Firebase.'   },
+    { icon: 'fa-shield-alt', label: t('focus','cyber')    || 'Cybersecurity',                color: 'accent',    desc: 'OWASP standards, Network Security, and secure coding practices.'},
+    { icon: 'fa-cloud',      label: t('focus','cloud')    || 'Cloud Computing',              color: 'info',      desc: 'Deploying scalable solutions on AWS, Azure, and Serverless platforms.'            },
+    { icon: 'fa-code',       label: t('focus','software') || 'Software Engineering',         color: 'primary',   desc: 'Clean code, OOP, Design Patterns, and robust system architecture.' },
+    { icon: 'fa-database',   label: t('focus','db')       || 'Database Systems',             color: 'secondary', desc: 'Complex schema design and optimization in MySQL, PostgreSQL, and MongoDB.'        },
+  ];
+
+  const skillRows = [
+    { title: t('skills','lang')   || 'Languages',      icon:'fa-terminal',   color:'primary',   skills:['Java','JavaScript','Python','C++','SQL','HTML5','CSS3'] },
+    { title: t('skills','front')  || 'Front-End',      icon:'fa-desktop',    color:'secondary', skills:['React.js','Next.js','Bootstrap','Tailwind','Responsive'] },
+    { title: t('skills','back')   || 'Back-End',       icon:'fa-server',     color:'info',      skills:['Node.js','Express.js','REST APIs','Auth','DB Integration'] },
+    { title: t('skills','mobile') || 'Mobile',         icon:'fa-mobile-alt', color:'accent',    skills:['Flutter','React Native','Firebase','Cross-Platform'] },
+    { title: t('skills','cloud')  || 'Cloud',          icon:'fa-cloud',      color:'primary',   skills:['AWS','Azure','IAM','Serverless','Storage'] },
+    { title: t('skills','cyber')  || 'Cybersecurity',  icon:'fa-shield-alt', color:'accent',    skills:['Network Sec','OWASP','Secure Code','Vuln Assessment'] },
+    { title: t('skills','db')     || 'Databases',      icon:'fa-database',   color:'secondary', skills:['MySQL','PostgreSQL','MongoDB','SQL Optimization'] },
+    { title: t('skills','tools')  || 'Dev Tools',      icon:'fa-tools',      color:'info',      skills:['Git','Docker','Linux','VS Code','Postman','Figma'] },
+  ];
+
+  const experiences = [
+    { title: t('exp','t1')||'Academic Software Dev',  org: t('exp','o1')||'Jimma Institute of Technology', period:'2022–Present', color:'primary',   icon:'fa-graduation-cap',
+      points:[t('exp','p1a'), t('exp','p1b'), t('exp','p1c')] },
+    { title: t('exp','t2')||'Team-Based Development', org: t('exp','o2')||'University Group Projects',     period:'2023–Present', color:'secondary', icon:'fa-users',
+      points:[t('exp','p2a'), t('exp','p2b'), t('exp','p2c')] },
+    { title: t('exp','t3')||'Technical Research',     org: t('exp','o3')||'Independent Study',             period:'2022–Present', color:'accent',    icon:'fa-book-open',
+      points:[t('exp','p3a'), t('exp','p3b'), t('exp','p3c')] },
+    { title: t('exp','t4')||'Open Source & Freelance',org: t('exp','o4')||'Personal & Freelance',          period:'2024–Present', color:'info',      icon:'fa-laptop-code',
+      points:[t('exp','p4a'), t('exp','p4b'), t('exp','p4c')] },
+  ];
+
+  const certs = [
+    { title:'AWS Certified Cloud Practitioner', org:'Amazon Web Services', icon:'fa-cloud',        color:'primary',   status:t('certStatus','progress')||'In Progress' },
+    { title:'Azure Fundamentals (AZ-900)',       org:'Microsoft',           icon:'fa-window-restore',color:'info',      status:t('certStatus','progress')||'In Progress' },
+    { title:'Cisco CCNA',                        org:'Cisco',               icon:'fa-network-wired',color:'secondary', status:t('certStatus','targeted')||'Targeted'    },
+    { title:'Google Cybersecurity Certificate',  org:'Google',              icon:'fa-shield-alt',   color:'accent',    status:t('certStatus','progress')||'In Progress' },
+    { title:'Meta Front-End Developer',          org:'Meta',                icon:'fa-code',         color:'primary',   status:t('certStatus','targeted')||'Targeted'    },
+    { title:'Meta Back-End Developer',           org:'Meta',                icon:'fa-server',       color:'secondary', status:t('certStatus','targeted')||'Targeted'    },
+  ];
+
+  const softSkills = ['Problem Solving','Critical Thinking','Continuous Learning','Team Collaboration','Leadership','Adaptability','Communication','Analytical Thinking'];
+
+  // Tech marquee items
+  const marqueeTech = ["React", "Node.js", "Python", "Docker", "AWS", "MongoDB", "Flutter", "TypeScript", "Next.js", "Firebase", "PostgreSQL", "Tailwind", "Git", "Figma"];
+
+  const px = (mousePos.x - 0.5) * 30;
+  const py = (mousePos.y - 0.5) * 30;
+
   return (
     <>
-      {/* ═══════════════════════════ HERO ═══════════════════════════ */}
-      <header className="hero-section min-vh-100 d-flex align-items-center">
-        <div className="container">
-          <div className="row align-items-center gy-5 text-center text-lg-start">
-            <div className="col-lg-7 reveal">
-              <div className="hero-badge mb-4 mx-auto mx-lg-0">
-                <span className="badge-icon"><i className="fas fa-bolt"></i></span>
-                <span className="badge-text">{t('hero', 'available')}</span>
+      {/* ══════════════════════ HERO ══════════════════════ */}
+      <header className="home-hero" ref={heroRef}>
+        {/* Animated Background Gradients */}
+        <div className="hero-bg-aurora">
+            <div className="aurora-1"></div>
+            <div className="aurora-2"></div>
+            <div className="aurora-3"></div>
+        </div>
+
+        {/* animated particles */}
+        <div className="hero-particles" aria-hidden="true">
+          {[...Array(30)].map((_, i) => (
+            <div key={i} className="particle" style={{
+              left: `${Math.random() * 100}%`,
+              top:  `${Math.random() * 100}%`,
+              width:  `${2 + Math.random() * 4}px`,
+              height: `${2 + Math.random() * 4}px`,
+              animationDuration: `${5 + Math.random() * 10}s`,
+              animationDelay:    `${Math.random() * 5}s`,
+              background: i % 3 === 0 ? 'var(--primary)' : i % 3 === 1 ? 'var(--secondary)' : 'var(--accent)',
+              boxShadow: `0 0 10px ${i % 3 === 0 ? 'var(--primary)' : i % 3 === 1 ? 'var(--secondary)' : 'var(--accent)'}`
+            }} />
+          ))}
+        </div>
+
+        <div className="container" style={{ position: 'relative', zIndex: 10 }}>
+          <div className="home-hero-grid">
+            {/* ── LEFT: text ── */}
+            <div className="hero-left reveal">
+              <div className="hero-badge-pill">
+                <span className="badge-dot" />
+                <span className="badge-text">{t('hero','available') || 'Available for Internships & Collaboration'}</span>
+                <div className="badge-shine"></div>
               </div>
-              <h1 className="hero-title mb-3">
-                {t('hero', 'hello')}<br />
-                <span className="text-gradient d-block mt-2">GIRMA ASHETU ASEFA</span>
+
+              <h1 className="hero-h1">
+                {t('hero','hello') || "Hello, I'm"}<br />
+                <span className="hero-name-gradient" data-text="GIRMA ASHETU ASEFA">GIRMA ASHETU ASEFA</span>
               </h1>
-              <h4 className="text-white mb-4 fw-normal">{t('hero', 'subtitle')}</h4>
-              <div className="typing-box mb-4">
-                <h5 className="hero-subtitle fs-4" id="typing-hero-container">
-                  <span id="typing-hero" ref={typingRef} className="text-primary"></span>
-                  <span className="cursor">|</span>
-                </h5>
-              </div>
-              <p className="hero-description mb-5 text-light mx-auto mx-lg-0" style={{ lineHeight: '1.9', fontSize: '1.1rem' }}>
-                {t('hero', 'description')}
-              </p>
-              <div className="hero-actions d-flex flex-wrap gap-4 justify-content-center justify-content-lg-start">
-                <Link to="/projects" className="btn-premium">
-                  <span className="btn-text">{t('hero', 'viewProjects')}</span>
-                  <span className="btn-icon"><i className="fas fa-arrow-right"></i></span>
-                </Link>
-                <a href="/cv.pdf" className="btn-outline-premium" download>
-                  <i className="fas fa-download me-2"></i>{t('hero', 'downloadResume')}
-                </a>
-                <Link to="/contact" className="btn-outline-premium">{t('hero', 'contactMe')}</Link>
-              </div>
-            </div>
-            <div className="col-lg-5 reveal">
-              <div className="hero-visual">
-                <div className="visual-container">
-                  <div className="glow-orb"></div>
-                  <div className="rotating-rings">
-                    <div className="orbit-path" style={{ inset: '-30px', borderStyle: 'dashed', opacity: 0.1 }}></div>
-                    <div className="orbit-path" style={{ inset: '-70px', borderStyle: 'dotted', opacity: 0.05 }}></div>
-                    <div className="ring ring-1"></div>
-                    <div className="ring ring-2"></div>
-                    <div className="ring ring-3"></div>
-                  </div>
-                  <div className="profile-mask">
-                    <div className="hud-overlay"></div>
-                    <div className="corner-brackets"></div>
-                    <img src="/about_profile.jpg" alt="Girma Ashetu Asefa" className="hero-avatar" />
-                  </div>
-                  <div className="tech-float float-1 glass-pane">
-                    <i className="fas fa-shield-alt text-accent"></i>
-                  </div>
-                  <div className="tech-float float-2 glass-pane">
-                    <i className="fas fa-cloud text-primary"></i>
-                  </div>
-                  <div className="tech-float float-3 glass-pane" style={{ bottom: '40%', right: '-15px', animationDelay: '-1.5s' }}>
-                    <i className="fas fa-code text-secondary"></i>
-                  </div>
+
+              <p className="hero-sub">{t('hero','subtitle') || 'Software Engineering Student at Jimma Institute of Technology'}</p>
+
+              <div className="hero-typing-wrapper">
+                <div className="hero-typing-row">
+                    <span className="typing-prefix">›</span>
+                    <span className="typing-text" ref={typingRef} />
+                    <span className="typing-cursor">|</span>
                 </div>
               </div>
+
+              <p className="hero-desc">{t('hero','description')}</p>
+
+              <div className="hero-cta-row">
+                <Link to="/projects" className="btn-masterpiece-primary">
+                  <span className="btn-bg-slide"></span>
+                  <span className="btn-content">
+                    <i className="fas fa-rocket me-2" />
+                    {t('hero','viewProjects') || 'Explore Projects'}
+                  </span>
+                </Link>
+                <Link to="/contact" className="btn-masterpiece-outline">
+                  <span className="btn-content">
+                    <i className="fas fa-paper-plane me-2" />
+                    {t('hero','contactMe') || 'Contact Me'}
+                  </span>
+                </Link>
+              </div>
+
+              {/* social quick-links */}
+              <div className="hero-socials">
+                <a href="https://github.com/Girma-Ashetu" target="_blank" rel="noreferrer" className="hero-social-link" title="GitHub">
+                  <i className="fab fa-github" />
+                </a>
+                <a href="mailto:girma@example.com" className="hero-social-link" title="Email">
+                  <i className="fas fa-envelope" />
+                </a>
+                <a href="https://linkedin.com" target="_blank" rel="noreferrer" className="hero-social-link" title="LinkedIn">
+                  <i className="fab fa-linkedin-in" />
+                </a>
+              </div>
+            </div>
+
+            {/* ── RIGHT: visual ── */}
+            <div className="hero-right reveal">
+              <TiltCard className="hero-avatar-scene" style={{ '--px': `${px}px`, '--py': `${py}px` }}>
+                <div className="avatar-glow-bg" />
+                {/* orbit rings */}
+                <div className="orbit orbit-1"><div className="orbit-dot" /></div>
+                <div className="orbit orbit-2"><div className="orbit-dot" /></div>
+                <div className="orbit orbit-3"><div className="orbit-dot orbit-dot--accent" /></div>
+                
+                {/* Center Avatar Core */}
+                <div className="avatar-core-container">
+                    <div className="avatar-pulse-rings">
+                        <div className="pulse-ring pr-1"></div>
+                        <div className="pulse-ring pr-2"></div>
+                    </div>
+                    <div className="avatar-frame">
+                        <div className="avatar-hud-line hl-top"></div>
+                        <div className="avatar-hud-line hl-bottom"></div>
+                        <div className="avatar-hud-line hl-left"></div>
+                        <div className="avatar-hud-line hl-right"></div>
+                        <div className="avatar-overlay-grid"></div>
+                        <img src="/about_profile.jpg" alt="Girma Ashetu Asefa" className="avatar-img" />
+                    </div>
+                </div>
+
+                {/* floating tech badges */}
+                <div className="tech-badge tech-badge--1 glass-pane-premium">
+                  <i className="fas fa-shield-alt" style={{color:'var(--accent)'}} />
+                </div>
+                <div className="tech-badge tech-badge--2 glass-pane-premium">
+                  <i className="fas fa-cloud" style={{color:'var(--primary)'}} />
+                </div>
+                <div className="tech-badge tech-badge--3 glass-pane-premium">
+                  <i className="fas fa-code" style={{color:'var(--secondary)'}} />
+                </div>
+                <div className="tech-badge tech-badge--4 glass-pane-premium">
+                  <i className="fab fa-react" style={{color:'var(--info)'}} />
+                </div>
+              </TiltCard>
             </div>
           </div>
         </div>
-        <div className="hero-scroll-indicator">
-          <span className="scroll-text">{t('hero','scroll') || 'Scroll to Explore'}</span>
-          <div className="scroll-line"></div>
+
+        {/* scroll cue */}
+        <div className="hero-scroll-cue">
+          <div className="scroll-mouse">
+            <div className="scroll-mouse-dot" />
+          </div>
+          <span className="scroll-cue-text">{t('hero','scroll') || 'Scroll To Explore'}</span>
         </div>
+        
+        {/* Bottom Fade out */}
+        <div className="hero-bottom-fade"></div>
       </header>
 
-      {/* ═══════════════════════════ STATS ═══════════════════════════ */}
-      <section className="py-10">
+      {/* ══════════════════════ TECH MARQUEE ══════════════════════ */}
+      <div className="tech-marquee-wrapper">
+          <div className="tech-marquee">
+              <div className="tech-marquee-track">
+                  {[...marqueeTech, ...marqueeTech, ...marqueeTech].map((tech, idx) => (
+                      <div key={idx} className="tech-marquee-item">
+                          <span className="tech-marquee-dot"></span>
+                          {tech}
+                      </div>
+                  ))}
+              </div>
+          </div>
+      </div>
+
+      {/* ══════════════════════ STATS BAND ══════════════════════ */}
+      <section className="stats-band">
         <div className="container">
-          <div className="row g-4 text-center justify-content-center">
-            {achievementStats.map((s, i) => (
-              <div key={i} className="col-md-3 reveal-up">
-                <div className="glass-pane glass-pane-hover p-5 h-100 bento-item">
-                  <div className="stat-icon mb-3"><i className={`fas ${s.icon} text-${s.color} fs-2`}></i></div>
-                  <h2 className="display-4 fw-bold text-white mb-0">{s.val}</h2>
-                  <p className={`small uppercase mt-2 tracking-widest fw-bold text-${s.color}`}>{s.label}</p>
-                  <div className={`stat-accent bg-${s.color}`}></div>
-                </div>
-              </div>
+          <div className="stats-grid">
+            {stats.map((s, i) => (
+              <StatCard key={i} {...s} index={i} />
             ))}
           </div>
         </div>
       </section>
 
-      {/* ═══════════════════════════ FOCUS AREAS ═══════════════════════════ */}
-      <section className="py-10">
-        <div className="container py-5 text-center">
-          <div className="reveal-up mb-5">
-            <h6 className="text-primary uppercase tracking-widest mb-3" style={{ letterSpacing: '4px' }}>{t('homeTitles','focus')}</h6>
-            <h2 className="display-5 fw-bold mb-3">{t('homeTitles','focusSub')}</h2>
+      {/* ══════════════════════ FOCUS AREAS ══════════════════════ */}
+      <section className="home-section relative-section">
+        <div className="section-bg-element bg-element-1"></div>
+        <div className="container relative-z">
+          <div className="section-head reveal">
+            <span className="section-chip">{t('homeTitles','focus') || 'Focus Areas'}</span>
+            <h2 className="section-title">{t('homeTitles','focusSub') || 'What I Do'}</h2>
+            <p className="section-sub">Specialized expertise across the full software engineering spectrum, delivering enterprise-grade solutions.</p>
           </div>
-          <div className="row g-4">
+          <div className="focus-grid">
             {focusAreas.map((area, i) => (
-              <div key={i} className="col-lg-4 col-md-6 reveal-up">
-                <div className={`glass-pane p-4 h-100 bento-item d-flex flex-column flex-sm-row align-items-center gap-4 text-center text-sm-start border-start border-3 border-${area.color}`}>
-                  <i className={`fas ${area.icon} text-${area.color} fs-2 flex-shrink-0 mb-3 mb-sm-0`}></i>
-                  <h5 className="fw-bold text-white mb-0">{area.label}</h5>
-                </div>
-              </div>
+              <TiltCard key={i}>
+                  <div className="focus-card reveal-up" style={{ animationDelay: `${i * 0.08}s` }}>
+                    <div className="focus-card-glow" style={{ '--fc-color': `var(--${area.color})` }} />
+                    <div className="focus-card-border-run" style={{ '--fc-color': `var(--${area.color})` }}></div>
+                    <div className="focus-icon" style={{ color: `var(--${area.color})`, borderColor: `color-mix(in srgb, var(--${area.color}) 30%, transparent)` }}>
+                        <i className={`fas ${area.icon}`} />
+                    </div>
+                    <h4 className="focus-label">{area.label}</h4>
+                    <p className="focus-desc">{area.desc}</p>
+                    <div className="focus-hover-reveal" style={{ background: `linear-gradient(to top, color-mix(in srgb, var(--${area.color}) 10%, transparent), transparent)` }}></div>
+                  </div>
+              </TiltCard>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ═══════════════════════════ SKILLS ═══════════════════════════ */}
-      <section className="py-10">
-        <div className="container py-5">
-          <div className="text-center mb-5 reveal">
-            <h6 className="text-primary uppercase tracking-widest mb-3" style={{ letterSpacing: '4px' }}>{t('homeTitles','skills')}</h6>
-            <h2 className="display-5 fw-bold mb-3">{t('homeTitles','skillsSub')}</h2>
-            <p className="text-muted fs-5 mx-auto" style={{ maxWidth: '580px' }}>
-              {t('about','p1')}
-            </p>
+      {/* ══════════════════════ SKILLS ══════════════════════ */}
+      <section className="home-section home-section--alt relative-section">
+        <div className="section-divider-top"></div>
+        <div className="container relative-z">
+          <div className="section-head reveal">
+            <span className="section-chip">{t('homeTitles','skills') || 'Skills & Expertise'}</span>
+            <h2 className="section-title">{t('homeTitles','skillsSub') || 'Technical Arsenal'}</h2>
           </div>
-          <div className="row g-4 mb-5">
-            {skillCategories.map((cat, i) => (
-              <div key={i} className="col-lg-3 col-md-6 reveal-up">
-                <div className={`glass-pane p-4 h-100 bento-item border-top border-3 border-${cat.color}`}>
-                  <h6 className={`text-${cat.color} fw-bold mb-3`}>
-                    <i className={`fas ${cat.icon} me-2`}></i>{cat.title}
-                  </h6>
-                  <div className="d-flex flex-wrap gap-2">
-                    {cat.skills.map((skill, si) => (
-                      <span key={si} className={`badge bg-${cat.color} bg-opacity-25 text-${cat.color} border border-${cat.color}`}>{skill}</span>
-                    ))}
+          <div className="skills-bento">
+            {skillRows.map((cat, i) => (
+              <TiltCard key={i}>
+                  <div className={`skill-bento-card reveal-up`} style={{ '--sb-color': `var(--${cat.color})`, animationDelay: `${i * 0.07}s` }}>
+                    <div className="skill-bento-glow"></div>
+                    <div className="skill-bento-header">
+                        <span className="skill-bento-icon" style={{ background: `color-mix(in srgb, var(--${cat.color}) 15%, transparent)` }}>
+                        <i className={`fas ${cat.icon}`} style={{ color: `var(--${cat.color})` }} />
+                        </span>
+                        <h6 className="skill-bento-title" style={{ color: '#fff' }}>{cat.title}</h6>
+                    </div>
+                    <div className="skill-pills-wrap">
+                        {cat.skills.map((s, si) => (
+                        <SkillPill key={si} skill={s} color={cat.color} delay={`${si * 0.05}s`} />
+                        ))}
+                    </div>
                   </div>
-                </div>
-              </div>
+              </TiltCard>
             ))}
           </div>
+
           {/* Soft Skills */}
-          <div className="glass-pane p-4 reveal-up">
-            <h5 className="text-white fw-bold mb-4"><i className="fas fa-users text-primary me-2"></i>{t('homeTitles','softSkillsTitle') || t('about','tabs')?.soft || 'Soft Skills'}</h5>
-            <div className="d-flex flex-wrap gap-3">
+          <div className="soft-skills-band reveal-up">
+            <div className="soft-skills-bg-pattern"></div>
+            <div className="soft-skills-header">
+              <div className="icon-box">
+                <i className="fas fa-users" />
+              </div>
+              <span>Professional Soft Skills</span>
+            </div>
+            <div className="soft-pills">
               {softSkills.map((s, i) => (
-                <span key={i} className="badge bg-secondary bg-opacity-25 text-secondary border border-secondary px-3 py-2 fs-6">
-                  <i className="fas fa-check-circle me-2 text-primary"></i>{s}
+                <span key={i} className="soft-pill">
+                  <i className="fas fa-check" style={{ color: 'var(--primary)', marginRight: 8 }} />
+                  {s}
                 </span>
               ))}
             </div>
@@ -263,26 +435,34 @@ function Home() {
         </div>
       </section>
 
-      {/* ═══════════════════════════ EXPERIENCE ═══════════════════════════ */}
-      <section className="py-10">
-        <div className="container py-5">
-          <div className="text-center mb-5 reveal">
-            <h6 className="text-primary uppercase tracking-widest mb-3" style={{ letterSpacing: '4px' }}>{t('homeTitles','experience')}</h6>
-            <h2 className="display-5 fw-bold mb-3">{t('homeTitles','expSub')}</h2>
+      {/* ══════════════════════ EXPERIENCE ══════════════════════ */}
+      <section className="home-section relative-section">
+        <div className="section-bg-element bg-element-2"></div>
+        <div className="container relative-z">
+          <div className="section-head reveal">
+            <span className="section-chip">{t('homeTitles','experience') || 'Experience'}</span>
+            <h2 className="section-title">{t('homeTitles','expSub') || 'My Journey'}</h2>
           </div>
-          <div className="row g-4">
+          <div className="exp-timeline">
             {experiences.map((exp, i) => (
-              <div key={i} className="col-lg-6 reveal-up">
-                <div className={`glass-pane p-4 p-md-5 h-100 bento-item border-start border-4 border-${exp.color}`}>
-                  <div className="d-flex flex-column flex-sm-row align-items-center align-items-sm-start gap-3 mb-4 text-center text-sm-start">
-                    <i className={`fas ${exp.icon} text-${exp.color} fs-2 flex-shrink-0`}></i>
-                    <div>
-                      <h5 className="text-white fw-bold mb-1">{exp.title}</h5>
-                      <span className={`badge bg-${exp.color} bg-opacity-25 text-${exp.color} border border-${exp.color}`}>{exp.org} · {exp.period}</span>
-                    </div>
+              <div key={i} className="exp-card reveal-up" style={{ '--exp-color': `var(--${exp.color})`, animationDelay: `${i * 0.1}s` }}>
+                <div className="exp-card-glow"></div>
+                <div className="exp-card-left">
+                  <div className="exp-icon">
+                    <i className={`fas ${exp.icon}`} style={{ color: `var(--${exp.color})` }} />
+                    <div className="exp-icon-ring"></div>
                   </div>
-                  <ul className="text-muted mb-0 ps-3 text-start" style={{ lineHeight: '1.9' }}>
-                    {exp.points.map((pt, j) => <li key={j}>{pt}</li>)}
+                  <div className="exp-spine" />
+                </div>
+                <div className="exp-body">
+                  <div className="exp-meta">
+                    <h5 className="exp-title">{exp.title}</h5>
+                    <span className="exp-badge" style={{ color: `var(--${exp.color})`, borderColor: `color-mix(in srgb, var(--${exp.color}) 30%, transparent)`, background: `color-mix(in srgb, var(--${exp.color}) 10%, transparent)` }}>
+                      <i className="far fa-calendar-alt me-2"></i>{exp.org} · {exp.period}
+                    </span>
+                  </div>
+                  <ul className="exp-points">
+                    {exp.points.map((pt, j) => <li key={j}><span className="li-bullet" style={{background: `var(--${exp.color})`}}></span>{pt}</li>)}
                   </ul>
                 </div>
               </div>
@@ -291,117 +471,80 @@ function Home() {
         </div>
       </section>
 
-      {/* ═══════════════════════════ CERTIFICATIONS ═══════════════════════════ */}
-      <section className="py-10">
-        <div className="container py-5">
-          <div className="text-center mb-5 reveal">
-            <h6 className="text-primary uppercase tracking-widest mb-3" style={{ letterSpacing: '4px' }}>{t('homeTitles','certs')}</h6>
-            <h2 className="display-5 fw-bold mb-3">{t('homeTitles','certsSub')}</h2>
-            <p className="text-muted fs-5 mx-auto" style={{ maxWidth: '560px' }}>
-              {t('about','p2')}
-            </p>
+      {/* ══════════════════════ CERTIFICATIONS ══════════════════════ */}
+      <section className="home-section home-section--alt relative-section">
+        <div className="section-divider-top"></div>
+        <div className="container relative-z">
+          <div className="section-head reveal">
+            <span className="section-chip">{t('homeTitles','certs') || 'Certifications'}</span>
+            <h2 className="section-title">{t('homeTitles','certsSub') || 'Verified Expertise'}</h2>
           </div>
-          <div className="row g-4">
+          <div className="certs-grid">
             {certs.map((cert, i) => (
-              <div key={i} className="col-md-6 col-lg-4 reveal-up">
-                <div className={`glass-pane p-4 h-100 bento-item border-top border-3 border-${cert.color}`}>
-                  <div className="d-flex align-items-center gap-3 mb-3">
-                    <i className={`fas ${cert.icon} text-${cert.color} fs-2`}></i>
-                    <span className={`badge ${cert.status === 'In Progress' ? 'bg-primary' : 'bg-secondary'} ms-auto`}>{cert.status}</span>
+              <TiltCard key={i}>
+                  <div className="cert-card reveal-up" style={{ '--cert-color': `var(--${cert.color})`, animationDelay: `${i * 0.08}s` }}>
+                    <div className="cert-bg-glow"></div>
+                    <div className="cert-top">
+                        <div className="cert-icon-wrap" style={{ background: `color-mix(in srgb, var(--${cert.color}) 15%, transparent)`, color: `var(--${cert.color})`, borderColor: `color-mix(in srgb, var(--${cert.color}) 30%, transparent)` }}>
+                        <i className={`fas ${cert.icon}`} />
+                        </div>
+                        <span className={`cert-status ${cert.status === (t('certStatus','progress')||'In Progress') ? 'status--progress' : 'status--targeted'}`}>
+                        {cert.status === (t('certStatus','progress')||'In Progress') ? <i className="fas fa-spinner fa-spin me-1"></i> : <i className="fas fa-bullseye me-1"></i>}
+                        {cert.status}
+                        </span>
+                    </div>
+                    <h6 className="cert-title">{cert.title}</h6>
+                    <p className="cert-org"><i className="far fa-building me-1"></i>{cert.org}</p>
+                    <div className="cert-bar" style={{ background: `var(--${cert.color})` }} />
                   </div>
-                  <h6 className="text-white fw-bold mb-1">{cert.title}</h6>
-                  <p className={`text-${cert.color} small mb-0`}>{cert.org}</p>
-                </div>
-              </div>
+              </TiltCard>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ═══════════════════════════ ACHIEVEMENTS ═══════════════════════════ */}
-      <section className="py-10">
-        <div className="container py-5">
-          <div className="text-center mb-5 reveal">
-            <h6 className="text-primary uppercase tracking-widest mb-3" style={{ letterSpacing: '4px' }}>{t('homeTitles','achievements')}</h6>
-            <h2 className="display-5 fw-bold mb-3">{t('homeTitles','achieveSub')}</h2>
-          </div>
-          <div className="row g-4">
-            {/* Academic */}
-            <div className="col-lg-6 reveal-up">
-              <div className="glass-pane p-5 h-100 bento-item border-top border-3 border-primary">
-                <h4 className="text-white fw-bold mb-4"><i className="fas fa-graduation-cap text-primary me-3"></i>{t('achieveTitles','academic') || 'Academic Growth'}</h4>
-                <ul className="list-unstyled d-flex flex-column gap-3">
-                  {academic.map((item, i) => (
-                    <li key={i} className="d-flex align-items-center gap-3">
-                      <span className="badge bg-primary rounded-circle p-2"><i className="fas fa-check"></i></span>
-                      <span className="text-white">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-            {/* Technical */}
-            <div className="col-lg-6 reveal-up">
-              <div className="glass-pane p-5 h-100 bento-item border-top border-3 border-secondary">
-                <h4 className="text-white fw-bold mb-4"><i className="fas fa-trophy text-secondary me-3"></i>{t('achieveTitles','technical') || 'Technical Accomplishments'}</h4>
-                <ul className="list-unstyled d-flex flex-column gap-3">
-                  {technical.map((item, i) => (
-                    <li key={i} className="d-flex align-items-center gap-3">
-                      <span className="badge bg-secondary rounded-circle p-2"><i className="fas fa-check"></i></span>
-                      <span className="text-white">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-            {/* GitHub */}
-            <div className="col-12 reveal-up">
-              <div className="glass-pane p-5 bento-item-large border-top border-3 border-accent">
-                <div className="row align-items-center g-4">
-                  <div className="col-lg-7">
-                    <h4 className="text-white fw-bold mb-3"><i className="fab fa-github text-accent me-3"></i>{t('achieveTitles','github') || 'GitHub Portfolio'}</h4>
-                    <p className="text-muted fs-5 mb-4" style={{ lineHeight: '1.8' }}>
-                      {t('achieveTitles','githubDesc') || 'My GitHub serves as a live showcase of my software development journey.'}
-                    </p>
-                    <a href="https://github.com/Girma-Ashetu" target="_blank" rel="noopener noreferrer" className="btn-premium">
-                      <span className="btn-text">{t('achieveTitles','viewGithub') || 'View GitHub Profile'}</span>
-                      <span className="btn-icon"><i className="fab fa-github"></i></span>
-                    </a>
+      {/* ══════════════════════ CTA BANNER ══════════════════════ */}
+      <section className="home-section relative-section" style={{ paddingBottom: '8rem' }}>
+        <div className="container relative-z">
+          <div className="cta-banner reveal-up">
+            <div className="cta-banner-bg-grid"></div>
+            <div className="cta-banner-glow" />
+            <div className="cta-banner-left">
+              <div className="cta-avatar-wrapper">
+                  <div className="cta-avatar-ring"></div>
+                  <div className="cta-avatar">
+                      <img src="/about_profile.jpg" alt="Girma" />
                   </div>
-                  <div className="col-lg-5">
-                    <div className="d-flex flex-wrap gap-2">
-                      {['Web Development','Mobile Apps','Cloud Projects','Cybersecurity','Software Engineering','Academic Projects'].map((cat, i) => (
-                        <span key={i} className="badge bg-accent bg-opacity-25 text-accent border border-accent px-3 py-2">{cat}</span>
-                      ))}
-                    </div>
-                  </div>
+              </div>
+              <div className="cta-text">
+                <div className="section-chip" style={{ marginBottom: 16 }}>{t('homeTitles','mission') || 'Professional Mission'}</div>
+                <h2 className="cta-title">Let's Build Something<br /><span className="hero-name-gradient">Extraordinary</span></h2>
+                <p className="cta-desc">{t('hero','description')}</p>
+                <div className="cta-actions">
+                  <Link to="/projects" className="btn-masterpiece-primary">
+                      <span className="btn-bg-slide"></span>
+                      <span className="btn-content"><i className="fas fa-folder-open me-2" />{t('hero','viewProjects') || 'View Projects'}</span>
+                  </Link>
+                  <Link to="/contact" className="btn-masterpiece-outline">
+                      <span className="btn-content"><i className="fas fa-handshake me-2" />{t('contact','title') || 'Get in Touch'}</span>
+                  </Link>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════ FEATURED PROJECT (CTA) ═══════════════════════════ */}
-      <section className="py-10">
-        <div className="container py-5">
-          <div className="glass-pane overflow-hidden reveal-up bento-item-large">
-            <div className="row g-0">
-              <div className="col-lg-5 position-relative overflow-hidden">
-                <img src="/about_profile.jpg" alt="Girma Asefa" loading="lazy" className="img-fluid h-100 w-100 innovation-img" style={{ objectFit: 'cover', objectPosition: 'top' }} />
-                <div className="img-overlay-glow"></div>
-              </div>
-              <div className="col-lg-7 p-5 d-flex flex-column justify-content-center">
-                <div className="premium-badge mb-4">{t('homeTitles','mission')}</div>
-                <h2 className="display-6 fw-bold mb-4">{t('hero','description').substring(0,40)}...</h2>
-                <p className="text-muted fs-5 mb-5" style={{ lineHeight: '1.9' }}>
-                  {t('hero','description')}
-                </p>
-                <div className="d-flex gap-4 flex-wrap">
-                  <Link to="/projects" className="btn-premium">{t('hero','viewProjects')}</Link>
-                  <Link to="/contact" className="btn-outline-premium">{t('contact','title')}</Link>
+            <div className="cta-stats-col">
+              {[
+                { v: '10+',  l: 'Projects',      c: 'primary', icon: 'fa-project-diagram'   },
+                { v: '500+', l: 'Contributions', c: 'secondary', icon: 'fa-code-branch' },
+                { v: '6+',   l: 'Certs',         c: 'accent', icon: 'fa-certificate'    },
+              ].map((s,i) => (
+                <div key={i} className="cta-stat" style={{ '--cs-color': `var(--${s.c})` }}>
+                  <div className="cta-stat-icon" style={{ color: `var(--${s.c})` }}><i className={`fas ${s.icon}`}></i></div>
+                  <div className="cta-stat-info">
+                      <span className="cta-stat-val" style={{ color: `var(--${s.c})` }}>{s.v}</span>
+                      <span className="cta-stat-label">{s.l}</span>
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
@@ -409,5 +552,3 @@ function Home() {
     </>
   );
 }
-
-export default Home;
