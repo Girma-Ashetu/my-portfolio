@@ -58,8 +58,11 @@ function Footer() {
               <a href="https://linkedin.com/" target="_blank" rel="noopener noreferrer" title="LinkedIn" className="social-pill">
                 <i className="fab fa-linkedin-in"></i>
               </a>
-              <a href="https://t.me/Progirma35" target="_blank" rel="noopener noreferrer" title="Telegram" className="social-pill">
+              <a href="https://t.me/Progirma35" target="_blank" rel="noopener noreferrer" title="Telegram Personal" className="social-pill">
                 <i className="fab fa-telegram-plane"></i>
+              </a>
+              <a href="https://t.me/soft_wareENG" target="_blank" rel="noopener noreferrer" title="Telegram Channel" className="social-pill">
+                <i className="fas fa-broadcast-tower"></i>
               </a>
               <a href="mailto:girme405@gmail.com" title="Email" className="social-pill">
                 <i className="fas fa-envelope"></i>
@@ -91,7 +94,11 @@ function Footer() {
               </li>
               <li>
                   <div className="contact-icon"><i className="fab fa-telegram-plane"></i></div>
-                  <span className="contact-text">@Progirma35</span>
+                  <a href="https://t.me/Progirma35" target="_blank" rel="noopener noreferrer" className="contact-text">@Progirma35</a>
+              </li>
+              <li>
+                  <div className="contact-icon"><i className="fas fa-broadcast-tower"></i></div>
+                  <a href="https://t.me/soft_wareENG" target="_blank" rel="noopener noreferrer" className="contact-text">t.me/soft_wareENG</a>
               </li>
               <li>
                   <div className="contact-icon"><i className="fas fa-phone"></i></div>

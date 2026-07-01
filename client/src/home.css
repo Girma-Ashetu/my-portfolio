@@ -89,6 +89,8 @@
   filter: blur(120px);
   opacity: 0.4;
   animation: aurora-move 20s infinite alternate linear;
+  will-change: transform;
+  transform: translateZ(0); /* Hardware acceleration */
 }
 .aurora-1 {
   width: 600px; height: 600px;
@@ -120,6 +122,8 @@
   border-radius:50%;
   opacity:.4;
   animation:particle-float linear infinite;
+  will-change: transform, opacity;
+  transform: translateZ(0);
 }
 @keyframes particle-float {
   0%   { transform:translateY(0) scale(1);   opacity:0; }
@@ -306,6 +310,7 @@
   transform:translate(var(--px,0),var(--py,0));
   transition:transform .1s linear;
   transform-style: preserve-3d;
+  will-change: transform;
 }
 @media(max-width:991px){ .hero-avatar-scene{ width:350px; height:350px; } }
 @media(max-width:575px){ .hero-avatar-scene{ width:280px; height:280px; } }

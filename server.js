@@ -15,6 +15,25 @@ const auth = require('./auth');
 app.use(cors());
 app.use(express.json());
 
+const multer = require('multer');
+const fs = require('fs');
+
+const uploadDir = path.join(__dirname, 'client', 'public', 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + '-' + file.originalname);
+  }
+});
+const upload = multer({ storage: storage });
+
 // Serve static files from the React client build directory
 app.use(express.static(path.join(__dirname, 'client', 'dist')));
 
@@ -66,8 +85,12 @@ app.post('/api/admin/login', async (req, res) => {
 });
 
 // Admin: Add Project
-app.post('/api/admin/projects', auth, async (req, res) => {
-  const { title, description, long_description, technologies, link, image_url } = req.body;
+app.post('/api/admin/projects', auth, upload.single('image'), async (req, res) => {
+  const { title, description, long_description, technologies, link } = req.body;
+  let image_url = req.body.image_url; // fallback if string is passed
+  if (req.file) {
+    image_url = `uploads/${req.file.filename}`;
+  }
   try {
     await db.query('INSERT INTO projects (title, description, long_description, technologies, link, image_url) VALUES (?, ?, ?, ?, ?, ?)',
       [title, description, long_description, technologies, link, image_url]);
@@ -83,6 +106,25 @@ app.delete('/api/admin/projects/:id', auth, async (req, res) => {
   try {
     await db.query('DELETE FROM projects WHERE id = ?', [req.params.id]);
     res.json({ message: 'Project deleted' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+// Admin: Update Project
+app.put('/api/admin/projects/:id', auth, upload.single('image'), async (req, res) => {
+  const { title, description, long_description, technologies, link } = req.body;
+  let image_url = req.body.image_url;
+  if (req.file) {
+    image_url = `uploads/${req.file.filename}`;
+  }
+  try {
+    await db.query(
+      'UPDATE projects SET title=?, description=?, long_description=?, technologies=?, link=?, image_url=? WHERE id=?',
+      [title, description, long_description, technologies, link, image_url, req.params.id]
+    );
+    res.json({ message: 'Project updated successfully' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server Error' });

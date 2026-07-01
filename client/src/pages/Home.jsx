@@ -63,20 +63,26 @@ function TiltCard({ children, className, style }) {
 
   const handleMouseMove = (e) => {
     if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const rotateX = ((y - centerY) / centerY) * -10;
-    const rotateY = ((x - centerX) / centerX) * 10;
+    requestAnimationFrame(() => {
+      if (!cardRef.current) return;
+      const rect = cardRef.current.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const rotateX = ((y - centerY) / centerY) * -10;
+      const rotateY = ((x - centerX) / centerX) * 10;
 
-    cardRef.current.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+      cardRef.current.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+    });
   };
 
   const handleMouseLeave = () => {
     if (!cardRef.current) return;
-    cardRef.current.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+    requestAnimationFrame(() => {
+      if (!cardRef.current) return;
+      cardRef.current.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+    });
   };
 
   return (
@@ -96,20 +102,24 @@ export default function Home() {
   const { t, language } = useLanguage();
   const typingRef = useRef(null);
   const heroRef = useRef(null);
-  const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
 
   /* ── Parallax on hero ── */
   useEffect(() => {
     const hero = heroRef.current;
     if (!hero) return;
     const move = (e) => {
-      const rect = hero.getBoundingClientRect();
-      setMousePos({
-        x: (e.clientX - rect.left) / rect.width,
-        y: (e.clientY - rect.top) / rect.height,
+      // Throttle/RAF for performance
+      requestAnimationFrame(() => {
+        const rect = hero.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width;
+        const y = (e.clientY - rect.top) / rect.height;
+        const px = (x - 0.5) * 30;
+        const py = (y - 0.5) * 30;
+        hero.style.setProperty('--px', `${px}px`);
+        hero.style.setProperty('--py', `${py}px`);
       });
     };
-    hero.addEventListener('mousemove', move);
+    hero.addEventListener('mousemove', move, { passive: true });
     return () => hero.removeEventListener('mousemove', move);
   }, []);
 
@@ -189,9 +199,6 @@ export default function Home() {
 
   // Tech marquee items
   const marqueeTech = ["React", "Node.js", "Python", "Docker", "AWS", "MongoDB", "Flutter", "TypeScript", "Next.js", "Firebase", "PostgreSQL", "Tailwind", "Git", "Figma"];
-
-  const px = (mousePos.x - 0.5) * 30;
-  const py = (mousePos.y - 0.5) * 30;
 
   return (
     <>
@@ -279,7 +286,7 @@ export default function Home() {
 
             {/* ── RIGHT: visual ── */}
             <div className="hero-right reveal">
-              <TiltCard className="hero-avatar-scene" style={{ '--px': `${px}px`, '--py': `${py}px` }}>
+              <TiltCard className="hero-avatar-scene">
                 <div className="avatar-glow-bg" />
                 {/* orbit rings */}
                 <div className="orbit orbit-1"><div className="orbit-dot" /></div>

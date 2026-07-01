@@ -42,7 +42,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        const COUNT = Math.min(50, Math.floor(window.innerWidth / 20));
+        const isMobile = window.innerWidth < 768;
+        const maxParticles = isMobile ? 25 : 60;
+        const COUNT = Math.min(maxParticles, Math.floor(window.innerWidth / 25));
         for (let i = 0; i < COUNT; i++) particles.push(new Particle());
 
         const animate = () => {

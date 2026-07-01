@@ -148,6 +148,8 @@ body::before {
     pointer-events: none;
     background: var(--darker);
     animation: simpleFadeIn 2s ease-out forwards;
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 @keyframes simpleFadeIn {
@@ -165,6 +167,8 @@ body::before {
     inset: -10%;
     width: 120%;
     height: 120%;
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 .bg-nebula-deep {

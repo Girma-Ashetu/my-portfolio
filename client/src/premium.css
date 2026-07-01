@@ -8,9 +8,19 @@
 /* ── GOOGLE FONTS (finer weights) ── */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800;900&display=swap');
 
-/* ── ROOT ENHANCEMENTS ── */
+/* ── ROOT ENHANCEMENTS & MOBILE PERFORMANCE ── */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
 html {
   scroll-behavior: smooth;
+}
+
+body {
+  -webkit-overflow-scrolling: touch;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 :root {

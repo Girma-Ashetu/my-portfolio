@@ -9,20 +9,25 @@ function TiltCard({ children, className, style }) {
 
   const handleMouseMove = (e) => {
     if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const rotateX = ((y - centerY) / centerY) * -5;
-    const rotateY = ((x - centerX) / centerX) * 5;
-
-    cardRef.current.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.01, 1.01, 1.01)`;
+    requestAnimationFrame(() => {
+      if (!cardRef.current) return;
+      const rect = cardRef.current.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const rotateX = ((y - centerY) / centerY) * -5;
+      const rotateY = ((x - centerX) / centerX) * 5;
+      cardRef.current.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.01, 1.01, 1.01)`;
+    });
   };
 
   const handleMouseLeave = () => {
     if (!cardRef.current) return;
-    cardRef.current.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+    requestAnimationFrame(() => {
+      if (!cardRef.current) return;
+      cardRef.current.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+    });
   };
 
   return (
@@ -66,6 +71,7 @@ function Contact() {
     { icon: 'fab fa-github',       label: 'GitHub',    value: 'github.com/Girma-Ashetu',    href: 'https://github.com/Girma-Ashetu',    color: 'secondary' },
     { icon: 'fab fa-linkedin-in',  label: 'LinkedIn',  value: 'linkedin.com/in/girmaasefa', href: 'https://linkedin.com/',              color: 'info'      },
     { icon: 'fab fa-telegram-plane',label:'Telegram',  value: '@Progirma35',                href: 'https://t.me/Progirma35',            color: 'primary'   },
+    { icon: 'fas fa-broadcast-tower', label:'TG Channel', value: 't.me/soft_wareENG',          href: 'https://t.me/soft_wareENG',          color: 'secondary' },
     { icon: 'fa-phone',            label: 'Phone',     value: '+251 915 387 500',            href: 'tel:+251915387500',                  color: 'accent'    },
     { icon: 'fa-map-marker-alt',   label: 'Location',  value: 'Jimma, Ethiopia',             href: null,                                color: 'secondary' },
   ];

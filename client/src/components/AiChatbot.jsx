@@ -45,6 +45,60 @@ function MarkdownText({ content }) {
   return <div className="markdown-body">{blocks}</div>;
 }
 
+// ─── Offline Knowledge Base ───────────────────────────────────────────────────
+const OFFLINE_KB = [
+  {
+    patterns: ['skill', 'tech', 'stack', 'know', 'language', 'tool', 'framework'],
+    answer: "**Girma's Full Tech Stack:**\n\n**Languages:** Java, JavaScript, Python, C++, SQL, HTML5, CSS3\n\n**Front-End:** React.js, Next.js, Bootstrap, Tailwind CSS\n\n**Back-End:** Node.js, Express.js, REST APIs, JWT Auth\n\n**Mobile:** Flutter, React Native, Firebase\n\n**Cloud & DevOps:** AWS, Azure, Docker, GitHub Actions\n\n**Databases:** MySQL, PostgreSQL, MongoDB\n\n**Cybersecurity:** OWASP Top 10, Network Security, Vulnerability Assessment\n\n> 💡 *Ask me about any specific skill for more details!*"
+  },
+  {
+    patterns: ['project', 'work', 'built', 'develop', 'portfolio', 'github', 'demo'],
+    answer: "**Girma's Key Projects:**\n\n📦 **Bank Management System** — Enterprise Java banking app with admin dashboard, Ethiopian Birr currency, and account lifecycle management.\n\n🌐 **AI Portfolio Platform** — This very site! Trilingual (EN/AM/OR), GAIA AI assistant, glassmorphism UI.\n\n🎓 **Course Management System (CSMS)** — Academic portal for Jimma Institute: student enrollment, grading, RBAC.\n\n🔐 **Cybersecurity Vulnerability Scanner** — OWASP Top 10 scanner with automated HTML reports.\n\n📱 **E-Commerce Mobile App** — Flutter + Firebase cross-platform marketplace with real-time sync.\n\n☁️ **Cloud Infrastructure Automation** — AWS + Docker CI/CD pipeline with GitHub Actions.\n\n🔗 GitHub: github.com/Girma-Ashetu"
+  },
+  {
+    patterns: ['hire', 'job', 'intern', 'employ', 'work', 'opportunit', 'availab', 'remote', 'freelance'],
+    answer: "**Is Girma Available?**\n\n✅ Yes! Girma is actively seeking:\n- **Internship** positions in software engineering\n- **Remote collaboration** on interesting projects\n- **Freelance** web/mobile development work\n\n**Ideal Roles:** Full-Stack Developer, Mobile Developer, Cloud Engineer, Security Analyst\n\n**Location:** Jimma, Ethiopia — open to remote globally\n\n📧 Reach out: girme405@gmail.com\n📱 Telegram: @Progirma35\n📡 TG Channel: t.me/soft_wareENG"
+  },
+  {
+    patterns: ['contact', 'email', 'phone', 'reach', 'telegram', 'linkedin', 'social', 'connect'],
+    answer: "**Contact Girma Directly:**\n\n📧 **Email:** girme405@gmail.com\n📱 **Phone:** +251 915 387 500\n💬 **Telegram:** @Progirma35\n📡 **TG Channel:** t.me/soft_wareENG\n🔗 **GitHub:** github.com/Girma-Ashetu\n💼 **LinkedIn:** linkedin.com/in/girmaasefa\n📍 **Location:** Jimma, Ethiopia\n\n> Girma typically responds within 24 hours. For fastest response, use Telegram or Email."
+  },
+  {
+    patterns: ['education', 'university', 'degree', 'study', 'school', 'college', 'jimma', 'academic'],
+    answer: "**Girma's Academic Background:**\n\n🎓 **Degree:** Bachelor of Science in Software Engineering\n🏛️ **Institution:** Jimma Institute of Technology\n📍 **Location:** Jimma, Ethiopia\n📅 **Period:** 2022 — Present\n\n**Status:** Currently an Undergraduate Student, actively building real-world projects alongside academic studies.\n\nGirma supplements formal education with self-directed learning, industry certifications, and hands-on project development."
+  },
+  {
+    patterns: ['certif', 'aws', 'azure', 'cisco', 'ccna', 'google', 'meta'],
+    answer: "**Girma's Certifications:**\n\n🟡 **AWS Certified Cloud Practitioner** — In Progress (Amazon Web Services)\n🟡 **Azure Fundamentals AZ-900** — In Progress (Microsoft)\n🎯 **Cisco CCNA** — Targeted (Cisco)\n🟡 **Google Cybersecurity Certificate** — In Progress (Google)\n🎯 **Meta Front-End Developer** — Targeted (Meta)\n🎯 **Meta Back-End Developer** — Targeted (Meta)\n\n> Girma is aggressively pursuing industry certifications to complement his strong academic foundation."
+  },
+  {
+    patterns: ['cyber', 'security', 'owasp', 'hack', 'penetr', 'vuln', 'network'],
+    answer: "**Girma's Cybersecurity Expertise:**\n\nGirma has a strong passion for cybersecurity with practical skills in:\n\n🔐 **OWASP Top 10** — Hands-on experience identifying and mitigating web vulnerabilities\n🌐 **Network Security** — Concepts of firewalls, IDS/IPS, VPNs\n🛡️ **Secure Coding** — Implementing best practices in every project\n🔍 **Vulnerability Assessment** — Built a real Python-based vulnerability scanner\n📜 **Pursuing:** Google Cybersecurity Certificate, Cisco CCNA\n\n> Security is not an afterthought in Girma's work — it's baked into the foundation."
+  },
+  {
+    patterns: ['cloud', 'aws', 'azure', 'docker', 'serverless', 'devops', 'deploy'],
+    answer: "**Girma's Cloud & DevOps Skills:**\n\n☁️ **AWS** — IAM, EC2, S3, Lambda, Serverless concepts\n☁️ **Azure** — Fundamentals (AZ-900 in progress)\n🐳 **Docker** — Containerization and multi-container setups\n🔄 **CI/CD** — GitHub Actions pipelines for automated testing and deployment\n📊 **Monitoring** — Basics of cloud monitoring and alerting\n\nGirma built a real cloud automation project using AWS + Docker + GitHub Actions demonstrating end-to-end DevOps practices."
+  },
+  {
+    patterns: ['mobile', 'flutter', 'react native', 'android', 'ios', 'app'],
+    answer: "**Girma's Mobile Development:**\n\n📱 **Flutter** — Cross-platform (iOS + Android) from a single Dart codebase\n⚛️ **React Native** — JavaScript-based cross-platform mobile\n🔥 **Firebase** — Real-time database, authentication, push notifications\n\n**Key Project:** Built a full E-Commerce mobile marketplace with:\n- Real-time product listings with Firebase sync\n- Secure user authentication\n- 60fps smooth animations\n- Payment gateway integration"
+  },
+  {
+    patterns: ['strength', 'soft skill', 'personality', 'quality', 'team', 'leader', 'communicat'],
+    answer: "**Girma's Professional Soft Skills:**\n\n✅ **Problem Solving** — Methodical approach to complex technical challenges\n✅ **Critical Thinking** — Analyzes requirements deeply before coding\n✅ **Continuous Learning** — Self-driven, always leveling up\n✅ **Team Collaboration** — Strong communicator in group academic and project settings\n✅ **Leadership** — Leads technical decisions and guides teammates\n✅ **Adaptability** — Picks up new technologies rapidly\n✅ **Analytical Thinking** — Data-driven decisions and architecture choices"
+  },
+];
+
+function getOfflineResponse(userText) {
+  const lower = userText.toLowerCase();
+  for (const entry of OFFLINE_KB) {
+    if (entry.patterns.some(p => lower.includes(p))) {
+      return entry.answer;
+    }
+  }
+  return "I'm currently running in **offline mode** since the server is unavailable, so my responses are limited to pre-loaded knowledge about Girma.\n\nHere's what I can answer right now:\n- 💼 His **skills & tech stack**\n- 📂 His **projects & GitHub**\n- 🎓 His **education & background**\n- 📜 His **certifications**\n- 📧 His **contact information**\n- 💡 His **career availability**\n\nTry asking one of those topics, or use the contact form to reach Girma directly!";
+}
+
 // ─── Smart Suggestions ────────────────────────────────────────────────────────
 function getSmartSuggestions(userMsg, aiMsg) {
   const m = (userMsg || '').toLowerCase(); const a = (aiMsg || '').toLowerCase();
@@ -79,6 +133,19 @@ const CATEGORIES = [
     { label: 'Contact Info',      msg: 'How can I reach Girma directly? Email, phone, Telegram?' },
   ]},
 ];
+
+// ─── Online Status Hook ───────────────────────────────────────────────────────
+function useOnlineStatus() {
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  useEffect(() => {
+    const up   = () => setIsOnline(true);
+    const down = () => setIsOnline(false);
+    window.addEventListener('online',  up);
+    window.addEventListener('offline', down);
+    return () => { window.removeEventListener('online', up); window.removeEventListener('offline', down); };
+  }, []);
+  return isOnline;
+}
 
 const makeWelcome = () => ({
   id: 'welcome', role: 'assistant',
@@ -117,6 +184,7 @@ function AiChatbotInner() {
   const inputRef       = useRef(null);
   const abortRef       = useRef(null);
   const recognitionRef = useRef(null);
+  const isOnline       = useOnlineStatus();
 
   useEffect(() => { try { localStorage.setItem('gaia_v5', JSON.stringify(messages)); } catch (_) {} }, [messages]);
   useEffect(() => { if (isOpen && !isMinimized) messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, isTyping, isOpen, isMinimized]);
@@ -178,7 +246,20 @@ function AiChatbotInner() {
       if (!isOpen || isMinimized) setHasUnread(true);
     } catch (err) {
       if (err.name === 'AbortError') return;
-      setMessages(prev => { const f = prev.filter(m => m.id !== aiMsgId); return [...f, { id: `err-${Date.now()}`, role: 'assistant', content: '⚠️ **Connection error.** Make sure the server is running and try again.', time: now(), isError: true, suggestions: [] }]; });
+      // ── OFFLINE FALLBACK: use local knowledge base instead of showing error ──
+      const offlineAnswer = getOfflineResponse(userText);
+      const suggestions = getSmartSuggestions(userText, offlineAnswer);
+      setMessages(prev => {
+        const filtered = prev.filter(m => m.id !== aiMsgId);
+        return [...filtered, {
+          id: `offline-${Date.now()}`,
+          role: 'assistant',
+          content: `⚡ *Running in offline mode — server unavailable.*\n\n${offlineAnswer}`,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          isError: false,
+          suggestions,
+        }];
+      });
     } finally { setIsTyping(false); abortRef.current = null; }
   }, [input, isTyping, messages, isOpen, isMinimized]);
 
@@ -209,11 +290,11 @@ function AiChatbotInner() {
           <div className="gaia-header-avatar">
             <div className="gaia-avatar-ring"></div>
             <i className="fas fa-robot" />
-            <span className="gaia-online-dot"></span>
+            <span className={`gaia-online-dot${isOnline ? '' : ' gaia-online-dot--offline'}`}></span>
           </div>
           <div className="gaia-header-info">
             <h6 className="gaia-header-name">GAIA <span className="gaia-badge-ai">AI</span></h6>
-            <p className="gaia-header-status"><span className="status-pulse"></span> Online · Gemini Powered</p>
+            <p className="gaia-header-status"><span className="status-pulse"></span> {isOnline ? 'Online · Gemini Powered' : '⚡ Offline Mode · Local KB'}</p>
           </div>
           <div className="gaia-header-actions">
             <button className="gaia-ctrl-btn" onClick={() => setShowSearch(v => !v)} title="Search chat"><i className="fas fa-search" /></button>
