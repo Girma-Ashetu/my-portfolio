@@ -122,8 +122,12 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-// Serve static files from the React client build directory
-app.use(express.static(path.join(__dirname, 'client', 'dist')));
+// Serve static files from the React client build directory (supports root dist or client/dist)
+const clientDistPath = fs.existsSync(path.join(__dirname, 'dist', 'index.html'))
+  ? path.join(__dirname, 'dist')
+  : path.join(__dirname, 'client', 'dist');
+
+app.use(express.static(clientDistPath));
 
 // ── Routes ───────────────────────────────────────────────────────────────────
 
@@ -625,7 +629,12 @@ app.post('/api/chat/stream', async (req, res) => {
 
 // ── Catchall → React app ─────────────────────────────────────────────────────
 app.get('/*splat', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
+  const indexFile = path.join(clientDistPath, 'index.html');
+  if (fs.existsSync(indexFile)) {
+    res.sendFile(indexFile);
+  } else {
+    res.status(200).send('Portfolio API Server is Live!');
+  }
 });
 
 app.listen(PORT, () => {
