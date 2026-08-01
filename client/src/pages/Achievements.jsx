@@ -1,113 +1,207 @@
-import React from 'react';
+import React, { useRef, useEffect, useState } from 'react';
+import './achievements.css';
+
+// Counter animation hook
+function useCounter(target, duration = 2000) {
+  const [count, setCount] = useState(0);
+  const [started, setStarted] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting && !started) setStarted(true); },
+      { threshold: 0.8 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [started]);
+
+  useEffect(() => {
+    if (!started) return;
+    const numeric = parseInt(String(target).replace(/\D/g, ''), 10);
+    const suffix = String(target).replace(/[0-9]/g, '');
+    let start = 0;
+    const step = numeric / (duration / 16);
+    const timer = setInterval(() => {
+      start += step;
+      if (start >= numeric) { setCount(numeric); clearInterval(timer); }
+      else setCount(Math.ceil(start));
+    }, 16);
+    return () => clearInterval(timer);
+  }, [started, target, duration]);
+
+  return { ref, display: (started ? count : 0) + (String(target).replace(/[0-9]/g, '')) };
+}
+
+function TiltCard({ children }) {
+  const ref = useRef(null);
+  const m = (e) => {
+    if (!ref.current) return;
+    const r = ref.current.getBoundingClientRect();
+    const x = ((e.clientX - r.left) / r.width - 0.5) * 8;
+    const y = ((e.clientY - r.top) / r.height - 0.5) * -8;
+    ref.current.style.transform = `perspective(1000px) rotateX(${y}deg) rotateY(${x}deg) scale3d(1.02,1.02,1.02)`;
+  };
+  const l = () => { if (ref.current) ref.current.style.transform = ''; };
+  return <div ref={ref} className="tilt-card-wrapper" onMouseMove={m} onMouseLeave={l}>{children}</div>;
+}
+
+function StatCard({ val, label, icon, color, scColor, delay = 0 }) {
+  const { ref, display } = useCounter(val);
+  return (
+    <TiltCard>
+      <div ref={ref} className="achieve-stat-card reveal-up" style={{ '--sc-color': scColor, animationDelay: `${delay}s` }}>
+        <div className="achieve-stat-glow" />
+        <span className="achieve-stat-icon" style={{ color }}><i className={`fas ${icon}`} /></span>
+        <div className="achieve-stat-val" style={{ color }}>{display}</div>
+        <div className="achieve-stat-label">{label}</div>
+      </div>
+    </TiltCard>
+  );
+}
 
 const stats = [
-  { val: '10+', label: 'Projects Completed', icon: 'fa-project-diagram', color: 'primary' },
-  { val: '500+', label: 'GitHub Contributions', icon: 'fa-code-branch', color: 'secondary' },
-  { val: '3+', label: 'Major Tech Stacks', icon: 'fa-layer-group', color: 'accent' },
-  { val: '6+', label: 'Certifications Pursued', icon: 'fa-certificate', color: 'info' },
+  { val: '10+', label: 'Projects Completed', icon: 'fa-project-diagram', color: 'var(--primary)', scColor: 'var(--primary)' },
+  { val: '500+', label: 'GitHub Contributions', icon: 'fa-code-branch', color: 'var(--secondary)', scColor: 'var(--secondary)' },
+  { val: '3+', label: 'Major Tech Stacks', icon: 'fa-layer-group', color: 'var(--accent)', scColor: 'var(--accent)' },
+  { val: '6+', label: 'Certifications Pursued', icon: 'fa-certificate', color: 'var(--warning)', scColor: 'var(--warning)' },
 ];
 
-const academic = [
+const academicItems = [
   'Object-Oriented Programming',
-  'Data Structures and Algorithms',
+  'Data Structures & Algorithms',
   'Database Systems',
   'Software Engineering Principles',
   'Computer Networks',
   'Operating Systems',
 ];
 
-const technical = [
-  'Developed multiple full-stack software projects',
+const technicalItems = [
+  'Developed multiple full-stack production-grade projects',
   'Built database-driven desktop & web applications',
-  'Created fully responsive web interfaces',
-  'Studied and implemented cloud technologies',
-  'Practiced cybersecurity and network security concepts',
-  'Maintained active, disciplined software development habits',
+  'Created fully responsive, accessible web interfaces',
+  'Implemented and deployed cloud infrastructure',
+  'Applied cybersecurity & network security concepts',
+  'Maintained active, disciplined daily development habits',
 ];
+
+const repoCats = ['Web Development', 'Mobile Applications', 'Cloud Projects', 'Cybersecurity', 'Software Engineering', 'Academic Projects'];
 
 function Achievements() {
   return (
-    <section className="py-10 mt-5 pt-5 min-vh-100">
-      <div className="container py-5">
-        <div className="text-center mb-5 reveal">
-          <h6 className="text-primary uppercase tracking-widest mb-3" style={{ letterSpacing: '4px' }}>Milestones</h6>
-          <h2 className="display-4 fw-bold mb-3">Achievements & <span className="text-primary">Growth</span></h2>
-          <p className="text-muted fs-5 mx-auto" style={{ maxWidth: '600px' }}>
-            A track record of consistent academic and technical accomplishments demonstrating capability and dedication.
+    <section className="achieve-master-section">
+      {/* Background */}
+      <div className="achieve-bg-aurora">
+        <div className="achieve-aurora-1" />
+        <div className="achieve-aurora-2" />
+      </div>
+      <div className="achieve-bg-grid" />
+
+      <div className="container relative-z">
+        {/* Header */}
+        <div className="achieve-header reveal">
+          <div className="achieve-icon-core">
+            <div className="achieve-ring-1" />
+            <div className="achieve-ring-2" />
+            <i className="fas fa-trophy" />
+          </div>
+          <span className="achieve-chip">Milestones</span>
+          <h2 className="achieve-title">Achievements &amp; <span className="text-gradient">Growth</span></h2>
+          <p className="achieve-sub">
+            A track record of consistent academic and technical accomplishments demonstrating capability, discipline, and dedication.
           </p>
         </div>
 
         {/* Stats */}
-        <div className="row g-4 mb-5">
-          {stats.map((s, i) => (
-            <div key={i} className="col-md-3 reveal-up">
-              <div className="glass-pane p-5 h-100 bento-item text-center">
-                <i className={`fas ${s.icon} text-${s.color} fs-2 mb-3`}></i>
-                <h2 className="display-4 fw-bold text-white mb-2">{s.val}</h2>
-                <p className={`text-${s.color} small uppercase tracking-widest fw-bold mb-0`}>{s.label}</p>
-              </div>
-            </div>
-          ))}
+        <div className="achieve-stats-grid">
+          {stats.map((s, i) => <StatCard key={i} {...s} delay={i * 0.1} />)}
         </div>
 
-        <div className="row g-4">
+        {/* Two-column panels */}
+        <div className="achieve-content-grid">
           {/* Academic */}
-          <div className="col-lg-6 reveal-up">
-            <div className="glass-pane p-5 h-100 bento-item border-top border-3 border-primary">
-              <h4 className="text-white fw-bold mb-4"><i className="fas fa-graduation-cap text-primary me-3"></i>Academic Growth</h4>
-              <p className="text-muted mb-4">Successfully completed Software Engineering coursework involving:</p>
-              <ul className="list-unstyled d-flex flex-column gap-3">
-                {academic.map((item, i) => (
-                  <li key={i} className="d-flex align-items-center gap-3">
-                    <span className="badge bg-primary rounded-circle p-2"><i className="fas fa-check"></i></span>
-                    <span className="text-white">{item}</span>
+          <TiltCard>
+            <div className="achieve-panel reveal-up">
+              <div className="achieve-panel-bar" style={{ background: 'linear-gradient(90deg, var(--primary), transparent)', color: 'var(--primary)' }} />
+              <div className="achieve-panel-glow" style={{ background: 'var(--primary)' }} />
+              <div className="achieve-panel-title">
+                <i className="fas fa-graduation-cap" style={{ color: 'var(--primary)' }} />
+                Academic Growth
+              </div>
+              <ul className="achieve-checklist">
+                {academicItems.map((item, i) => (
+                  <li key={i} className="achieve-check-item">
+                    <div className="achieve-check-icon" style={{ background: 'rgba(94,234,212,0.1)', color: 'var(--primary)', border: '1px solid rgba(94,234,212,0.2)' }}>
+                      <i className="fas fa-check" />
+                    </div>
+                    {item}
                   </li>
                 ))}
               </ul>
             </div>
-          </div>
+          </TiltCard>
 
           {/* Technical */}
-          <div className="col-lg-6 reveal-up">
-            <div className="glass-pane p-5 h-100 bento-item border-top border-3 border-secondary">
-              <h4 className="text-white fw-bold mb-4"><i className="fas fa-trophy text-secondary me-3"></i>Technical Accomplishments</h4>
-              <ul className="list-unstyled d-flex flex-column gap-3">
-                {technical.map((item, i) => (
-                  <li key={i} className="d-flex align-items-center gap-3">
-                    <span className="badge bg-secondary rounded-circle p-2"><i className="fas fa-check"></i></span>
-                    <span className="text-white">{item}</span>
+          <TiltCard>
+            <div className="achieve-panel reveal-up" style={{ animationDelay: '0.15s' }}>
+              <div className="achieve-panel-bar" style={{ background: 'linear-gradient(90deg, var(--secondary), transparent)', color: 'var(--secondary)' }} />
+              <div className="achieve-panel-glow" style={{ background: 'var(--secondary)' }} />
+              <div className="achieve-panel-title">
+                <i className="fas fa-trophy" style={{ color: 'var(--warning)' }} />
+                Technical Accomplishments
+              </div>
+              <ul className="achieve-checklist">
+                {technicalItems.map((item, i) => (
+                  <li key={i} className="achieve-check-item">
+                    <div className="achieve-check-icon" style={{ background: 'rgba(99,102,241,0.1)', color: 'var(--secondary)', border: '1px solid rgba(99,102,241,0.2)' }}>
+                      <i className="fas fa-check" />
+                    </div>
+                    {item}
                   </li>
                 ))}
               </ul>
             </div>
-          </div>
+          </TiltCard>
+        </div>
 
-          {/* GitHub Section */}
-          <div className="col-12 reveal-up">
-            <div className="glass-pane p-5 bento-item-large border-top border-3 border-accent">
-              <div className="row align-items-center g-4">
-                <div className="col-lg-6">
-                  <h4 className="text-white fw-bold mb-4"><i className="fab fa-github text-accent me-3"></i>GitHub Portfolio</h4>
-                  <p className="text-muted fs-5 mb-4" style={{ lineHeight: '1.8' }}>
-                    My GitHub serves as a live showcase of my software development journey and technical growth — housing professional repositories, clean documentation, and real-world projects.
-                  </p>
-                  <a href="https://github.com/Girma-Ashetu" target="_blank" rel="noopener noreferrer" className="btn-premium">
-                    <span className="btn-text">View GitHub Profile</span>
-                    <span className="btn-icon"><i className="fab fa-github"></i></span>
-                  </a>
-                </div>
-                <div className="col-lg-6">
-                  <h6 className="text-white fw-bold mb-4">Repository Categories</h6>
-                  <div className="d-flex flex-wrap gap-3">
-                    {['Web Development', 'Mobile Applications', 'Cloud Projects', 'Cybersecurity Projects', 'Software Engineering', 'Academic Projects'].map((cat, i) => (
-                      <span key={i} className="badge bg-accent bg-opacity-25 text-accent border border-accent px-3 py-2 fs-6">{cat}</span>
-                    ))}
-                  </div>
-                </div>
+        {/* GitHub Full-Width */}
+        <TiltCard>
+          <div className="achieve-github-panel reveal-up" style={{ marginTop: '2rem' }}>
+            <div className="achieve-github-glow" />
+            <div>
+              <h3 className="achieve-github-title">
+                <i className="fab fa-github me-3" style={{ color: 'var(--accent)' }} />
+                GitHub Portfolio
+              </h3>
+              <p className="achieve-github-desc">
+                My GitHub is a live showcase of my software development journey — professional repositories, clean documentation, and real-world projects that demonstrate technical growth and engineering discipline.
+              </p>
+              <a
+                href="https://github.com/Girma-Ashetu"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-masterpiece-primary"
+                style={{ textDecoration: 'none' }}
+              >
+                <span className="btn-bg-slide" />
+                <span className="btn-content">
+                  <i className="fab fa-github me-2" />
+                  View GitHub Profile
+                </span>
+              </a>
+            </div>
+            <div>
+              <h6 style={{ color: '#fff', fontWeight: 700, marginBottom: '1.5rem', fontSize: '1.1rem' }}>
+                Repository Categories
+              </h6>
+              <div className="achieve-repo-cats">
+                {repoCats.map((cat, i) => (
+                  <span key={i} className="achieve-cat-badge">{cat}</span>
+                ))}
               </div>
             </div>
           </div>
-        </div>
+        </TiltCard>
       </div>
     </section>
   );

@@ -5,11 +5,13 @@ function useAnimations() {
   const location = useLocation();
 
   useEffect(() => {
-    // Wait a brief moment for the DOM elements to actually render before observing them
+    let cleanups = [];
+    let observer;
+
     const timer = setTimeout(() => {
       // 1. Reveal Engine
       const options = { threshold: 0.15, rootMargin: '0px 0px -50px 0px' };
-      const observer = new IntersectionObserver((entries) => {
+      observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             entry.target.classList.add('active');
@@ -24,38 +26,45 @@ function useAnimations() {
       }, options);
 
       document.querySelectorAll('.reveal, .reveal-up, .bento-item, .bento-item-large, .glass-pane').forEach(el => {
-        // Only observe if not already active
         if (!el.classList.contains('active')) {
-            observer.observe(el);
+          observer.observe(el);
         }
       });
 
-      // 2. Tilt Interaction
+      // 2. Tilt Interaction (React-Safe, no replaceChild or cloneNode)
       const elements = document.querySelectorAll('.bento-item, .bento-item-large, .glass-pane-hover');
       elements.forEach(el => {
-        // Remove old listeners to avoid duplicates
-        const clone = el.cloneNode(true);
-        if(el.parentNode) el.parentNode.replaceChild(clone, el);
-        
-        clone.addEventListener('mousemove', (e) => {
-          const rect = clone.getBoundingClientRect();
+        const handleMouseMove = (e) => {
+          const rect = el.getBoundingClientRect();
           const x = e.clientX - rect.left;
           const y = e.clientY - rect.top;
           const centerX = rect.width / 2;
           const centerY = rect.height / 2;
           const rotateX = (-(y - centerY) / centerY) * 8;
           const rotateY = ((x - centerX) / centerX) * 8;
-          clone.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
-        });
-        clone.addEventListener('mouseleave', () => {
-          clone.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+          el.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+        };
+
+        const handleMouseLeave = () => {
+          el.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+        };
+
+        el.addEventListener('mousemove', handleMouseMove);
+        el.addEventListener('mouseleave', handleMouseLeave);
+
+        cleanups.push(() => {
+          el.removeEventListener('mousemove', handleMouseMove);
+          el.removeEventListener('mouseleave', handleMouseLeave);
         });
       });
-      
-    }, 100); // 100ms delay to ensure elements exist in DOM
+    }, 100);
 
-    return () => clearTimeout(timer);
-  }, [location.pathname]); // Re-run on route change
+    return () => {
+      clearTimeout(timer);
+      if (observer) observer.disconnect();
+      cleanups.forEach(cleanup => cleanup());
+    };
+  }, [location.pathname]);
 }
 
 export default useAnimations;

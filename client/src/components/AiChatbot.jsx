@@ -19,8 +19,8 @@ function MarkdownText({ content }) {
   };
   const renderLine = (line, idx) => {
     if (line.startsWith('### ')) return <h4 key={idx} className="md-h4">{line.slice(4)}</h4>;
-    if (line.startsWith('## '))  return <h3 key={idx} className="md-h3">{line.slice(3)}</h3>;
-    if (line.startsWith('# '))   return <h2 key={idx} className="md-h2">{line.slice(2)}</h2>;
+    if (line.startsWith('## ')) return <h3 key={idx} className="md-h3">{line.slice(3)}</h3>;
+    if (line.startsWith('# ')) return <h2 key={idx} className="md-h2">{line.slice(2)}</h2>;
     if (line.startsWith('- ') || line.startsWith('• ')) return <li key={idx} className="md-li">{renderInline(line.slice(2))}</li>;
     if (/^\d+\.\s/.test(line)) return <li key={idx} className="md-li">{renderInline(line.replace(/^\d+\.\s/, ''))}</li>;
     if (line === '---') return <hr key={idx} className="md-hr" />;
@@ -61,7 +61,7 @@ const OFFLINE_KB = [
   },
   {
     patterns: ['contact', 'email', 'phone', 'reach', 'telegram', 'linkedin', 'social', 'connect'],
-    answer: "**Contact Girma Directly:**\n\n📧 **Email:** girme405@gmail.com\n📱 **Phone:** +251 915 387 500\n💬 **Telegram:** @Progirma35\n📡 **TG Channel:** t.me/soft_wareENG\n🔗 **GitHub:** github.com/Girma-Ashetu\n💼 **LinkedIn:** linkedin.com/in/girmaasefa\n📍 **Location:** Jimma, Ethiopia\n\n> Girma typically responds within 24 hours. For fastest response, use Telegram or Email."
+    answer: "**Contact Girma Directly:**\n\n📧 **Email:** girme405@gmail.com\n📱 **Phone:** +251 915 387 500\n💬 **Telegram:** @Progirma35\n📡 **TG Channel:** t.me/soft_wareENG\n🔗 **GitHub:** github.com/Girma-Ashetu\n💼 **LinkedIn:** linkedin.com/in/girma-ashetu-a146b9422\n📍 **Location:** Jimma, Ethiopia\n\n> Girma typically responds within 24 hours. For fastest response, use Telegram or Email."
   },
   {
     patterns: ['education', 'university', 'degree', 'study', 'school', 'college', 'jimma', 'academic'],
@@ -102,45 +102,53 @@ function getOfflineResponse(userText) {
 // ─── Smart Suggestions ────────────────────────────────────────────────────────
 function getSmartSuggestions(userMsg, aiMsg) {
   const m = (userMsg || '').toLowerCase(); const a = (aiMsg || '').toLowerCase();
-  if (m.includes('skill') || a.includes('react') || a.includes('node')) return ['What backend stack does he use?','How good is he at React?','What mobile tech does he know?'];
-  if (m.includes('project') || a.includes('bank') || a.includes('portfolio')) return ['Which was the most complex project?','Does he have live demos?','What is his GitHub link?'];
-  if (m.includes('hire') || a.includes('intern') || a.includes('job')) return ['What roles is he open to?','What is his availability?','How do I schedule a call?'];
-  if (m.includes('cert') || a.includes('aws') || a.includes('azure')) return ['Which cert will he finish first?','Tell me about his AWS skills','Is he studying for CCNA?'];
-  if (m.includes('contact') || a.includes('email') || a.includes('telegram')) return ['What is his phone number?','What timezone is he in?','What is his GitHub?'];
-  return ['What are his strongest skills?','Tell me about his best project','Is he open to remote work?'];
+  if (m.includes('skill') || a.includes('react') || a.includes('node')) return ['What backend stack does he use?', 'How good is he at React?', 'What mobile tech does he know?'];
+  if (m.includes('project') || a.includes('bank') || a.includes('portfolio')) return ['Which was the most complex project?', 'Does he have live demos?', 'What is his GitHub link?'];
+  if (m.includes('hire') || a.includes('intern') || a.includes('job')) return ['What roles is he open to?', 'What is his availability?', 'How do I schedule a call?'];
+  if (m.includes('cert') || a.includes('aws') || a.includes('azure')) return ['Which cert will he finish first?', 'Tell me about his AWS skills', 'Is he studying for CCNA?'];
+  if (m.includes('contact') || a.includes('email') || a.includes('telegram')) return ['What is his phone number?', 'What timezone is he in?', 'What is his GitHub?'];
+  return ['What are his strongest skills?', 'Tell me about his best project', 'Is he open to remote work?'];
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const CATEGORIES = [
-  { id: 'career',  label: '💼 Career',  actions: [
-    { label: 'Hire Girma',        msg: 'Is Girma available for hire or internships right now?' },
-    { label: 'Remote Work?',      msg: 'Is Girma open to remote work or freelancing?' },
-    { label: 'Salary Expectation',msg: 'What are Girma\'s salary expectations for a junior role?' },
-  ]},
-  { id: 'skills',  label: '⚡ Skills',  actions: [
-    { label: 'Full Tech Stack',   msg: 'What is Girma\'s complete technical skill set?' },
-    { label: 'Strongest Skill',   msg: 'What is Girma\'s single strongest technical skill?' },
-    { label: 'Mobile Dev',        msg: 'Tell me about Girma\'s mobile app development experience' },
-  ]},
-  { id: 'projects',label: '📂 Projects',actions: [
-    { label: 'All Projects',      msg: 'List all of Girma\'s projects in detail' },
-    { label: 'Best Project',      msg: 'What is Girma\'s most impressive project and why?' },
-    { label: 'GitHub Link',       msg: 'What is the link to Girma\'s GitHub profile?' },
-  ]},
-  { id: 'about',   label: '👤 About',   actions: [
-    { label: 'Background',        msg: 'Tell me about Girma\'s academic background and education' },
-    { label: 'Certifications',    msg: 'What certifications is Girma currently pursuing?' },
-    { label: 'Contact Info',      msg: 'How can I reach Girma directly? Email, phone, Telegram?' },
-  ]},
+  {
+    id: 'career', label: '💼 Career', actions: [
+      { label: 'Hire Girma', msg: 'Is Girma available for hire or internships right now?' },
+      { label: 'Remote Work?', msg: 'Is Girma open to remote work or freelancing?' },
+      { label: 'Salary Expectation', msg: 'What are Girma\'s salary expectations for a junior role?' },
+    ]
+  },
+  {
+    id: 'skills', label: '⚡ Skills', actions: [
+      { label: 'Full Tech Stack', msg: 'What is Girma\'s complete technical skill set?' },
+      { label: 'Strongest Skill', msg: 'What is Girma\'s single strongest technical skill?' },
+      { label: 'Mobile Dev', msg: 'Tell me about Girma\'s mobile app development experience' },
+    ]
+  },
+  {
+    id: 'projects', label: '📂 Projects', actions: [
+      { label: 'All Projects', msg: 'List all of Girma\'s projects in detail' },
+      { label: 'Best Project', msg: 'What is Girma\'s most impressive project and why?' },
+      { label: 'GitHub Link', msg: 'What is the link to Girma\'s GitHub profile?' },
+    ]
+  },
+  {
+    id: 'about', label: '👤 About', actions: [
+      { label: 'Background', msg: 'Tell me about Girma\'s academic background and education' },
+      { label: 'Certifications', msg: 'What certifications is Girma currently pursuing?' },
+      { label: 'Contact Info', msg: 'How can I reach Girma directly? Email, phone, Telegram?' },
+    ]
+  },
 ];
 
 // ─── Online Status Hook ───────────────────────────────────────────────────────
 function useOnlineStatus() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   useEffect(() => {
-    const up   = () => setIsOnline(true);
+    const up = () => setIsOnline(true);
     const down = () => setIsOnline(false);
-    window.addEventListener('online',  up);
+    window.addEventListener('online', up);
     window.addEventListener('offline', down);
     return () => { window.removeEventListener('online', up); window.removeEventListener('offline', down); };
   }, []);
@@ -165,28 +173,28 @@ class ChatbotErrorBoundary extends React.Component {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 function AiChatbotInner() {
-  const [isOpen,      setIsOpen]      = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [messages,    setMessages]    = useState(() => {
-    try { const s = localStorage.getItem('gaia_v5'); const p = s ? JSON.parse(s) : null; if (Array.isArray(p) && p.length > 0) return p; } catch (_) {}
+  const [messages, setMessages] = useState(() => {
+    try { const s = localStorage.getItem('gaia_v5'); const p = s ? JSON.parse(s) : null; if (Array.isArray(p) && p.length > 0) return p; } catch (_) { }
     return [makeWelcome()];
   });
-  const [input,       setInput]       = useState('');
-  const [isTyping,    setIsTyping]    = useState(false);
-  const [hasUnread,   setHasUnread]   = useState(false);
-  const [copied,      setCopied]      = useState(null);
-  const [reactions,   setReactions]   = useState({});
-  const [activeTab,   setActiveTab]   = useState('career');
+  const [input, setInput] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const [hasUnread, setHasUnread] = useState(false);
+  const [copied, setCopied] = useState(null);
+  const [reactions, setReactions] = useState({});
+  const [activeTab, setActiveTab] = useState('career');
   const [isListening, setIsListening] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showSearch,  setShowSearch]  = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
   const messagesEndRef = useRef(null);
-  const inputRef       = useRef(null);
-  const abortRef       = useRef(null);
+  const inputRef = useRef(null);
+  const abortRef = useRef(null);
   const recognitionRef = useRef(null);
-  const isOnline       = useOnlineStatus();
+  const isOnline = useOnlineStatus();
 
-  useEffect(() => { try { localStorage.setItem('gaia_v5', JSON.stringify(messages)); } catch (_) {} }, [messages]);
+  useEffect(() => { try { localStorage.setItem('gaia_v5', JSON.stringify(messages)); } catch (_) { } }, [messages]);
   useEffect(() => { if (isOpen && !isMinimized) messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, isTyping, isOpen, isMinimized]);
   useEffect(() => { if (isOpen && !isMinimized) { setTimeout(() => inputRef.current?.focus(), 200); setHasUnread(false); } }, [isOpen, isMinimized]);
   useEffect(() => { if (inputRef.current) { inputRef.current.style.height = 'auto'; inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, 120)}px`; } }, [input]);
@@ -239,7 +247,7 @@ function AiChatbotInner() {
             const data = JSON.parse(line.slice(6));
             if (data.chunk) { fullContent += data.chunk; setMessages(prev => prev.map(m => m.id === aiMsgId ? { ...m, content: m.content + data.chunk } : m)); }
             if (data.done) { const suggestions = getSmartSuggestions(userText, fullContent); setMessages(prev => prev.map(m => m.id === aiMsgId ? { ...m, isStreaming: false, suggestions } : m)); }
-          } catch (_) {}
+          } catch (_) { }
         }
       }
       setMessages(prev => prev.map(m => { if (m.id !== aiMsgId) return m; const s = m.suggestions?.length > 0 ? m.suggestions : getSmartSuggestions(userText, m.content); return { ...m, isStreaming: false, suggestions: s }; }));
@@ -298,8 +306,8 @@ function AiChatbotInner() {
           </div>
           <div className="gaia-header-actions">
             <button className="gaia-ctrl-btn" onClick={() => setShowSearch(v => !v)} title="Search chat"><i className="fas fa-search" /></button>
-            <button className="gaia-ctrl-btn" onClick={exportChat}              title="Export chat"><i className="fas fa-download" /></button>
-            <button className="gaia-ctrl-btn" onClick={clearChat}               title="Clear chat"><i className="fas fa-trash-alt" /></button>
+            <button className="gaia-ctrl-btn" onClick={exportChat} title="Export chat"><i className="fas fa-download" /></button>
+            <button className="gaia-ctrl-btn" onClick={clearChat} title="Clear chat"><i className="fas fa-trash-alt" /></button>
             <button className="gaia-ctrl-btn" onClick={() => setIsMinimized(v => !v)} title="Minimize"><i className={`fas ${isMinimized ? 'fa-chevron-up' : 'fa-minus'}`} /></button>
             <button className="gaia-ctrl-btn gaia-ctrl-close" onClick={() => { setIsOpen(false); setIsMinimized(false); }} title="Close"><i className="fas fa-times" /></button>
           </div>
@@ -331,7 +339,7 @@ function AiChatbotInner() {
                             <button className="gaia-action-btn" onClick={() => addReaction(msg.id, '👍')} data-active={reactions[msg.id] === '👍'} title="Helpful">👍</button>
                             <button className="gaia-action-btn" onClick={() => addReaction(msg.id, '👎')} data-active={reactions[msg.id] === '👎'} title="Not helpful">👎</button>
                             <button className="gaia-action-btn" onClick={() => copyMsg(msg.id, msg.content)} title="Copy">
-                              {copied === msg.id ? <i className="fas fa-check" style={{color:'#4ade80'}} /> : <i className="far fa-copy" />}
+                              {copied === msg.id ? <i className="fas fa-check" style={{ color: '#4ade80' }} /> : <i className="far fa-copy" />}
                             </button>
                           </>
                         )}

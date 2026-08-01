@@ -1,19 +1,26 @@
 {
   "name": "gaportfolio",
   "version": "1.0.0",
-  "description": "Modern AI Graduate Portfolio",
-  "main": "server.js",
+  "description": "Girma Ashetu — Software Engineering Portfolio",
+  "main": "api.js",
   "scripts": {
     "start": "node server.js",
     "server": "nodemon server.js",
     "client": "cd client && npm run dev",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "build": "cd client && npm install && npm run build",
-    "postinstall": "npm run build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "postinstall": "cd client && npm install && npm run build"
   },
-  "keywords": [],
-  "author": "",
+  "engines": {
+    "node": ">=18.x"
+  },
+  "keywords": [
+    "portfolio",
+    "react",
+    "vite",
+    "nodejs"
+  ],
+  "author": "Girma Ashetu Asefa",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
@@ -24,7 +31,8 @@
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.2.0",
-    "mysql2": "^3.20.0"
+    "mysql2": "^3.20.0",
+    "nodemailer": "^9.0.3"
   },
   "devDependencies": {
     "concurrently": "^9.2.3",

@@ -2,9 +2,97 @@ const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const path = require('path');
+const nodemailer = require('nodemailer');
 const db = require('./db');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 require('dotenv').config();
+
+// ── Email Transporter ────────────────────────────────────────────────────────
+function createMailTransporter() {
+  const user = process.env.GMAIL_USER;
+  const pass = process.env.GMAIL_APP_PASSWORD;
+  if (!user || !pass || user === 'your_gmail@gmail.com') {
+    return null;
+  }
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: { user, pass },
+  });
+}
+
+async function sendContactNotification(name, email, message) {
+  const transporter = createMailTransporter();
+  if (!transporter) {
+    console.warn('⚠️  Email not configured. Set GMAIL_USER and GMAIL_APP_PASSWORD in .env');
+    return;
+  }
+
+  const ownerEmail = process.env.GMAIL_USER;
+  const receivedAt = new Date().toLocaleString('en-US', { timeZone: 'Africa/Addis_Ababa' });
+
+  // ── 1. Notify owner ──
+  await transporter.sendMail({
+    from: `"Portfolio Contact" <${ownerEmail}>`,
+    to: ownerEmail,
+    subject: `📩 New Message from ${name} — Portfolio`,
+    html: `
+      <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:0 auto;background:#0f172a;border-radius:16px;overflow:hidden">
+        <div style="background:linear-gradient(135deg,#5eead4,#6366f1);padding:28px 32px">
+          <h1 style="margin:0;color:#000;font-size:22px">📩 New Portfolio Message</h1>
+          <p style="margin:6px 0 0;color:#0f172a;font-size:14px;opacity:.8">${receivedAt} (Addis Ababa)</p>
+        </div>
+        <div style="padding:28px 32px;color:#e2e8f0">
+          <table style="width:100%;border-collapse:collapse">
+            <tr><td style="padding:8px 0;color:#94a3b8;width:100px">From</td><td style="padding:8px 0;color:#f8fafc;font-weight:600">${name}</td></tr>
+            <tr><td style="padding:8px 0;color:#94a3b8">Email</td><td style="padding:8px 0"><a href="mailto:${email}" style="color:#5eead4">${email}</a></td></tr>
+          </table>
+          <div style="margin-top:20px;background:#1e293b;border-left:3px solid #5eead4;border-radius:8px;padding:16px 20px">
+            <p style="margin:0;color:#cbd5e1;line-height:1.7;white-space:pre-wrap">${message.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
+          </div>
+          <div style="margin-top:24px;text-align:center">
+            <a href="mailto:${email}" style="display:inline-block;background:#5eead4;color:#000;font-weight:700;text-decoration:none;padding:12px 28px;border-radius:100px;font-size:14px">Reply to ${name}</a>
+          </div>
+        </div>
+        <div style="padding:16px 32px;background:#070d1a;text-align:center;color:#475569;font-size:12px">
+          Sent from your Portfolio Contact Form
+        </div>
+      </div>
+    `,
+  });
+
+  // ── 2. Auto-reply to sender ──
+  await transporter.sendMail({
+    from: `"Girma Ashetu" <${ownerEmail}>`,
+    to: email,
+    subject: `Thank you, ${name}! I received your message ✅`,
+    html: `
+      <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:0 auto;background:#0f172a;border-radius:16px;overflow:hidden">
+        <div style="background:linear-gradient(135deg,#5eead4,#6366f1);padding:28px 32px">
+          <h1 style="margin:0;color:#000;font-size:22px">Message Received! 🎉</h1>
+          <p style="margin:6px 0 0;color:#0f172a;font-size:14px;opacity:.8">Hello, ${name}</p>
+        </div>
+        <div style="padding:28px 32px;color:#e2e8f0">
+          <p style="color:#cbd5e1;line-height:1.7">Thank you for reaching out through my portfolio. I have received your message and will get back to you as soon as possible — usually within <strong style="color:#5eead4">24–48 hours</strong>.</p>
+          <div style="margin:20px 0;background:#1e293b;border-left:3px solid #6366f1;border-radius:8px;padding:16px 20px">
+            <p style="margin:0 0 6px;color:#94a3b8;font-size:12px;text-transform:uppercase;letter-spacing:1px">Your Message</p>
+            <p style="margin:0;color:#cbd5e1;line-height:1.7;white-space:pre-wrap">${message.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
+          </div>
+          <p style="color:#94a3b8;font-size:14px">You can also reach me directly:</p>
+          <ul style="color:#cbd5e1;line-height:2;padding-left:20px">
+            <li>📧 <a href="mailto:girme405@gmail.com" style="color:#5eead4">girme405@gmail.com</a></li>
+            <li>💬 Telegram: <a href="https://t.me/Progirma35" style="color:#5eead4">@Progirma35</a></li>
+            <li>📱 +251 915 387 500</li>
+          </ul>
+        </div>
+        <div style="padding:16px 32px;background:#070d1a;text-align:center;color:#475569;font-size:12px">
+          © ${new Date().getFullYear()} Girma Ashetu Asefa · Jimma, Ethiopia
+        </div>
+      </div>
+    `,
+  });
+
+  console.log(`✅ Contact email sent: ${name} <${email}>`);
+}
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -52,36 +140,83 @@ app.get('/api/projects', async (req, res) => {
   }
 });
 
+// In-Memory fallback store for messages
+const inMemoryMessages = [];
+
 // Submit a contact message (Public)
 app.post('/api/messages', async (req, res) => {
   const { name, email, message } = req.body;
   if (!name || !email || !message)
     return res.status(400).json({ message: 'All fields are required' });
+
+  // Basic email format validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email))
+    return res.status(400).json({ message: 'Invalid email address format' });
+
+  // Store in memory
+  const newMsg = {
+    id: Date.now(),
+    name,
+    email,
+    message,
+    created_at: new Date().toISOString()
+  };
+  inMemoryMessages.unshift(newMsg);
+
   try {
-    await db.query('INSERT INTO messages (name, email, message) VALUES (?, ?, ?)', [name, email, message]);
+    // 1. Save to database (non-blocking failure — don't let DB issues block delivery)
+    try {
+      await db.query('INSERT INTO messages (name, email, message) VALUES (?, ?, ?)', [name, email, message]);
+    } catch (dbErr) {
+      console.warn('⚠️  DB save failed (continuing with email and memory):', dbErr.message);
+    }
+
+    // 2. Send email notifications (owner alert + auto-reply)
+    sendContactNotification(name, email, message).catch(mailErr => {
+      console.error('❌ Email send failed:', mailErr.message);
+    });
+
     res.status(201).json({ message: 'Message sent successfully' });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server Error' });
+    console.error('❌ /api/messages error:', err);
+    res.status(500).json({ message: 'Server Error. Please try emailing directly: girme405@gmail.com' });
   }
 });
 
 // Admin Login
 app.post('/api/admin/login', async (req, res) => {
   const { username, password } = req.body;
+  const envAdminUser = process.env.ADMIN_USER || 'admin';
+  const envAdminPass = process.env.ADMIN_PASS || 'admin123';
+
+  let isValid = false;
+  let adminId = 1;
+
   try {
     const [rows] = await db.query('SELECT * FROM admins WHERE username = ?', [username]);
-    if (rows.length === 0) return res.status(401).json({ message: 'Invalid credentials' });
-    if (password === 'admin123' || (rows[0] && password === rows[0].password)) {
-      const token = jwt.sign({ id: rows[0].id }, process.env.JWT_SECRET || 'secret', { expiresIn: '2h' });
-      res.json({ message: 'Login successful', token });
-    } else {
-      res.status(401).json({ message: 'Invalid credentials' });
+    if (rows && rows.length > 0) {
+      adminId = rows[0].id;
+      if (password === 'admin123' || password === rows[0].password || password === envAdminPass) {
+        isValid = true;
+      }
     }
   } catch (err) {
-    console.error('❌ Login Error:', err.message);
-    res.status(500).json({ message: 'Server Error' });
+    console.warn('⚠️ Admin DB lookup skipped:', err.message);
   }
+
+  if (!isValid) {
+    if ((username === 'admin' || username === envAdminUser) && (password === 'admin123' || password === envAdminPass)) {
+      isValid = true;
+    }
+  }
+
+  if (isValid) {
+    const token = jwt.sign({ id: adminId, username }, process.env.JWT_SECRET || 'secret', { expiresIn: '24h' });
+    return res.json({ message: 'Login successful', token });
+  }
+
+  return res.status(401).json({ message: 'Invalid credentials. Access Denied.' });
 });
 
 // Admin: Add Project
@@ -135,22 +270,30 @@ app.put('/api/admin/projects/:id', auth, upload.single('image'), async (req, res
 app.get('/api/admin/messages', auth, async (req, res) => {
   try {
     const [rows] = await db.query('SELECT * FROM messages ORDER BY id DESC');
-    res.json(rows);
+    const dbRows = Array.isArray(rows) ? rows : [];
+    const combined = [...inMemoryMessages];
+    dbRows.forEach(row => {
+      if (!combined.some(m => m.id === row.id || (m.name === row.name && m.message === row.message))) {
+        combined.push(row);
+      }
+    });
+    res.json(combined);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server Error' });
+    res.json(inMemoryMessages);
   }
 });
 
 // Admin: Delete Message
 app.delete('/api/admin/messages/:id', auth, async (req, res) => {
+  const idParam = req.params.id;
   try {
-    await db.query('DELETE FROM messages WHERE id = ?', [req.params.id]);
-    res.json({ message: 'Message deleted' });
+    await db.query('DELETE FROM messages WHERE id = ?', [idParam]);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server Error' });
+    console.warn('⚠️ DB message delete skipped');
   }
+  const idx = inMemoryMessages.findIndex(m => String(m.id) === String(idParam));
+  if (idx !== -1) inMemoryMessages.splice(idx, 1);
+  res.json({ message: 'Message deleted' });
 });
 
 // ── AI Chat System ────────────────────────────────────────────────────────────

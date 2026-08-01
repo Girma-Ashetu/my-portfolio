@@ -1,0 +1,208 @@
+/* ════════════════════════════════════════════════════════════════
+   GAIA CHATBOT — WORLD-CLASS LIGHT MODE
+   ════════════════════════════════════════════════════════════════ */
+[data-theme="light"] .gaia-fab {
+    background: linear-gradient(135deg, #ffffff, #f0f9ff) !important;
+    border: 1px solid rgba(2, 132, 199, 0.3) !important;
+    color: #0f172a !important;
+    box-shadow: 0 10px 40px rgba(15, 23, 42, 0.12), 0 0 25px rgba(2, 132, 199, 0.1) !important;
+}
+
+[data-theme="light"] .gaia-fab:hover {
+    box-shadow: 0 15px 50px rgba(15, 23, 42, 0.15), 0 0 35px rgba(2, 132, 199, 0.15) !important;
+}
+
+[data-theme="light"] .gaia-fab-label {
+    color: #0f172a !important;
+}
+
+[data-theme="light"] .gaia-fab-ring {
+    border-color: rgba(2, 132, 199, 0.3) !important;
+}
+
+[data-theme="light"] .gaia-panel {
+    background: rgba(248, 250, 252, 0.98) !important;
+    border: 1px solid rgba(15, 23, 42, 0.09) !important;
+    box-shadow: 0 30px 80px rgba(15, 23, 42, 0.15), 0 0 40px rgba(2, 132, 199, 0.06) !important;
+}
+
+[data-theme="light"] .gaia-header {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.07) !important;
+}
+
+[data-theme="light"] .gaia-header-name {
+    color: #0f172a !important;
+}
+
+[data-theme="light"] .gaia-header-status {
+    color: rgba(15, 23, 42, 0.4) !important;
+}
+
+[data-theme="light"] .gaia-search-bar {
+    background: rgba(241, 245, 249, 0.8) !important;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.07) !important;
+}
+
+[data-theme="light"] .gaia-search-input {
+    color: #0f172a !important;
+}
+
+[data-theme="light"] .gaia-search-input::placeholder {
+    color: rgba(15, 23, 42, 0.3) !important;
+}
+
+[data-theme="light"] .gaia-search-icon {
+    color: rgba(15, 23, 42, 0.3) !important;
+}
+
+[data-theme="light"] .gaia-messages {
+    scrollbar-color: rgba(15, 23, 42, 0.1) transparent !important;
+}
+
+[data-theme="light"] .gaia-bubble--assistant {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 1px solid rgba(15, 23, 42, 0.07) !important;
+}
+
+[data-theme="light"] .gaia-bubble--user {
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.1), rgba(2, 132, 199, 0.08)) !important;
+    border: 1px solid rgba(79, 70, 229, 0.2) !important;
+}
+
+[data-theme="light"] .gaia-user-text {
+    color: rgba(15, 23, 42, 0.9) !important;
+}
+
+[data-theme="light"] .markdown-body {
+    color: rgba(15, 23, 42, 0.85) !important;
+}
+
+[data-theme="light"] .md-bold {
+    color: #4f46e5 !important;
+}
+
+[data-theme="light"] .md-code {
+    background: rgba(15, 23, 42, 0.06) !important;
+    color: #0284c7 !important;
+    border: 1px solid rgba(15, 23, 42, 0.08) !important;
+}
+
+[data-theme="light"] .md-h2 {
+    color: #0284c7 !important;
+}
+
+[data-theme="light"] .md-h3 {
+    color: #4f46e5 !important;
+}
+
+[data-theme="light"] .gaia-time {
+    color: rgba(15, 23, 42, 0.28) !important;
+}
+
+[data-theme="light"] .gaia-quick-wrap {
+    border-top: 1px solid rgba(15, 23, 42, 0.07) !important;
+}
+
+[data-theme="light"] .gaia-cat-tab {
+    border-color: rgba(15, 23, 42, 0.1) !important;
+    color: rgba(15, 23, 42, 0.5) !important;
+}
+
+[data-theme="light"] .gaia-cat-tab:hover {
+    border-color: rgba(15, 23, 42, 0.2) !important;
+    color: #0f172a !important;
+}
+
+[data-theme="light"] .gaia-cat-tab.active {
+    background: rgba(2, 132, 199, 0.1) !important;
+    border-color: rgba(2, 132, 199, 0.35) !important;
+    color: #0284c7 !important;
+}
+
+[data-theme="light"] .gaia-action-item {
+    background: rgba(241, 245, 249, 0.8) !important;
+    border: 1px solid rgba(15, 23, 42, 0.07) !important;
+    color: rgba(15, 23, 42, 0.7) !important;
+}
+
+[data-theme="light"] .gaia-action-item:hover {
+    background: rgba(224, 242, 254, 0.8) !important;
+    border-color: rgba(2, 132, 199, 0.2) !important;
+    color: #0f172a !important;
+}
+
+[data-theme="light"] .gaia-input-area {
+    background: rgba(241, 245, 249, 0.8) !important;
+    border-top: 1px solid rgba(15, 23, 42, 0.07) !important;
+}
+
+[data-theme="light"] .gaia-input {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid rgba(15, 23, 42, 0.1) !important;
+    color: #0f172a !important;
+}
+
+[data-theme="light"] .gaia-input::placeholder {
+    color: rgba(15, 23, 42, 0.28) !important;
+}
+
+[data-theme="light"] .gaia-input:focus {
+    border-color: rgba(2, 132, 199, 0.4) !important;
+    background: rgba(255, 255, 255, 1) !important;
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1) !important;
+}
+
+[data-theme="light"] .gaia-voice-btn {
+    background: rgba(241, 245, 249, 0.9) !important;
+    border: 1px solid rgba(15, 23, 42, 0.1) !important;
+    color: rgba(15, 23, 42, 0.4) !important;
+}
+
+[data-theme="light"] .gaia-voice-btn:hover {
+    background: rgba(2, 132, 199, 0.08) !important;
+    color: #0284c7 !important;
+    border-color: rgba(2, 132, 199, 0.3) !important;
+}
+
+[data-theme="light"] .gaia-footer-note {
+    color: rgba(15, 23, 42, 0.2) !important;
+    border-top: 1px solid rgba(15, 23, 42, 0.06) !important;
+}
+
+[data-theme="light"] .gaia-ctrl-btn {
+    color: rgba(15, 23, 42, 0.35) !important;
+}
+
+[data-theme="light"] .gaia-ctrl-btn:hover {
+    background: rgba(15, 23, 42, 0.06) !important;
+    color: #0f172a !important;
+}
+
+[data-theme="light"] .gaia-online-dot {
+    border-color: #f8fafc !important;
+}
+
+[data-theme="light"] .gaia-bubble-footer {
+    border-top-color: rgba(15, 23, 42, 0.05) !important;
+}
+
+[data-theme="light"] .gaia-action-btn {
+    color: rgba(15, 23, 42, 0.3) !important;
+}
+
+[data-theme="light"] .gaia-action-btn:hover {
+    background: rgba(15, 23, 42, 0.06) !important;
+    color: rgba(15, 23, 42, 0.8) !important;
+}
+
+[data-theme="light"] .gaia-suggestion-chip {
+    background: rgba(2, 132, 199, 0.05) !important;
+    border-color: rgba(2, 132, 199, 0.18) !important;
+    color: #0284c7 !important;
+}
+
+[data-theme="light"] .gaia-suggestion-chip:hover {
+    background: rgba(2, 132, 199, 0.12) !important;
+    border-color: rgba(2, 132, 199, 0.4) !important;
+}

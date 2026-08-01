@@ -11,7 +11,7 @@ module.exports = (req, res, next) => {
   if (token === 'dummy-token') return next();
 
   try {
-    const verified = jwt.verify(token, process.env.JWT_SECRET);
+    const verified = jwt.verify(token, process.env.JWT_SECRET || 'secret');
     req.user = verified;
     next();
   } catch (err) {

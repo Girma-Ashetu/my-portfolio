@@ -1,0 +1,426 @@
+/* ================================================================
+   ACHIEVEMENTS — PREMIUM MASTERPIECE DESIGN
+   ================================================================ */
+
+.achieve-master-section {
+    position: relative;
+    padding: clamp(8rem, 15vw, 10rem) 0 6rem;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+.achieve-bg-aurora {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.achieve-aurora-1,
+.achieve-aurora-2 {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(130px);
+    opacity: 0.12;
+    animation: aurora-drift 26s infinite alternate ease-in-out;
+}
+
+.achieve-aurora-1 {
+    width: 650px;
+    height: 650px;
+    background: var(--warning);
+    top: -10%;
+    right: -5%;
+}
+
+.achieve-aurora-2 {
+    width: 500px;
+    height: 500px;
+    background: var(--primary);
+    bottom: 0;
+    left: -10%;
+    animation-delay: -13s;
+}
+
+.achieve-bg-grid {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.02) 2px, transparent 2px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(ellipse at top, black, transparent 80%);
+    -webkit-mask-image: radial-gradient(ellipse at top, black, transparent 80%);
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* ── Header ── */
+.achieve-header {
+    text-align: center;
+    margin-bottom: 5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.achieve-icon-core {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: var(--warning);
+    margin-bottom: 2rem;
+}
+
+.achieve-ring-1,
+.achieve-ring-2 {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid transparent;
+}
+
+.achieve-ring-1 {
+    inset: 0;
+    border-top-color: rgba(251, 191, 36, 0.5);
+    border-bottom-color: rgba(251, 191, 36, 0.5);
+    animation: rotate-cw 8s linear infinite;
+}
+
+.achieve-ring-2 {
+    inset: -15px;
+    border-left-color: rgba(94, 234, 212, 0.4);
+    border-right-color: rgba(94, 234, 212, 0.4);
+    animation: rotate-ccw 12s linear infinite;
+    border-style: dashed;
+}
+
+.achieve-icon-core i {
+    filter: drop-shadow(0 0 20px var(--warning));
+    animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.achieve-chip {
+    display: inline-block;
+    padding: 6px 20px;
+    background: rgba(251, 191, 36, 0.08);
+    border: 1px solid rgba(251, 191, 36, 0.25);
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 3.5px;
+    text-transform: uppercase;
+    color: var(--warning);
+    margin-bottom: 1.2rem;
+}
+
+.achieve-title {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: -1.5px;
+    margin-bottom: 1rem;
+}
+
+.achieve-sub {
+    color: var(--text-dim);
+    font-size: 1.15rem;
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.7;
+}
+
+/* ── Stats Band ── */
+.achieve-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    margin-bottom: 4rem;
+}
+
+@media (max-width: 991px) {
+    .achieve-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 575px) {
+    .achieve-stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.achieve-stat-card {
+    position: relative;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 24px;
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: revealUp 0.6s both;
+}
+
+.achieve-stat-card:hover {
+    transform: translateY(-10px);
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(251, 191, 36, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.achieve-stat-glow {
+    position: absolute;
+    inset: -40%;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--sc-color, var(--primary)) 0%, transparent 65%);
+    opacity: 0.04;
+    pointer-events: none;
+    transition: 0.5s;
+}
+
+.achieve-stat-card:hover .achieve-stat-glow {
+    opacity: 0.15;
+}
+
+.achieve-stat-icon {
+    font-size: 2.2rem;
+    margin-bottom: 1.2rem;
+    filter: drop-shadow(0 0 10px currentColor);
+    display: block;
+}
+
+.achieve-stat-val {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 900;
+    letter-spacing: -2px;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+.achieve-stat-label {
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+}
+
+/* ── Content Grid ── */
+.achieve-content-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 991px) {
+    .achieve-content-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.achieve-panel {
+    position: relative;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.018);
+    backdrop-filter: blur(18px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 26px;
+    padding: 2.8rem;
+    transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    height: 100%;
+    animation: revealUp 0.6s both;
+}
+
+.achieve-panel:hover {
+    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.03);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.achieve-panel-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    border-radius: 100px 100px 0 0;
+    opacity: 0.5;
+    transition: 0.4s;
+}
+
+.achieve-panel:hover .achieve-panel-bar {
+    opacity: 1;
+    box-shadow: 0 0 15px currentColor;
+}
+
+.achieve-panel-glow {
+    position: absolute;
+    bottom: -80px;
+    right: -80px;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.07;
+    pointer-events: none;
+    transition: 0.4s;
+}
+
+.achieve-panel:hover .achieve-panel-glow {
+    opacity: 0.15;
+}
+
+.achieve-panel-title {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 2rem;
+    position: relative;
+    z-index: 2;
+}
+
+.achieve-panel-title i {
+    font-size: 1.4rem;
+    filter: drop-shadow(0 0 8px currentColor);
+}
+
+.achieve-checklist {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    position: relative;
+    z-index: 2;
+}
+
+.achieve-check-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: #fff;
+    font-size: 0.98rem;
+    line-height: 1.5;
+}
+
+.achieve-check-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    transition: 0.3s;
+}
+
+.achieve-check-item:hover .achieve-check-icon {
+    transform: scale(1.15) rotate(-5deg);
+}
+
+/* ── GitHub Full-Width ── */
+.achieve-github-panel {
+    position: relative;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 30px;
+    padding: 4rem;
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 3rem;
+    align-items: center;
+    animation: revealUp 0.6s both;
+    transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.achieve-github-panel:hover {
+    border-color: rgba(168, 85, 247, 0.25);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(168, 85, 247, 0.08);
+}
+
+.achieve-github-glow {
+    position: absolute;
+    bottom: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 400px;
+    height: 300px;
+    background: var(--accent);
+    filter: blur(100px);
+    opacity: 0.08;
+    pointer-events: none;
+}
+
+.achieve-github-title {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: #fff;
+    margin-bottom: 1rem;
+    letter-spacing: -0.5px;
+    position: relative;
+    z-index: 2;
+}
+
+.achieve-github-desc {
+    color: var(--text-dim);
+    font-size: 1rem;
+    line-height: 1.8;
+    margin-bottom: 2rem;
+    position: relative;
+    z-index: 2;
+}
+
+.achieve-repo-cats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    position: relative;
+    z-index: 2;
+}
+
+.achieve-cat-badge {
+    padding: 8px 18px;
+    background: rgba(168, 85, 247, 0.08);
+    border: 1px solid rgba(168, 85, 247, 0.2);
+    color: var(--accent);
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    transition: 0.3s;
+}
+
+.achieve-cat-badge:hover {
+    background: rgba(168, 85, 247, 0.18);
+    border-color: var(--accent);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(168, 85, 247, 0.25);
+}
+
+@media (max-width: 991px) {
+    .achieve-github-panel {
+        grid-template-columns: 1fr;
+        padding: 2.5rem;
+    }
+}
+
+@media (max-width: 575px) {
+    .achieve-panel {
+        padding: 1.8rem;
+    }
+
+    .achieve-github-panel {
+        padding: 1.8rem;
+    }
+}

@@ -3,6 +3,9 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import useAnimations from './hooks/useAnimations';
+import { LanguageProvider } from './context/LanguageContext';
+import { ThemeProvider } from './context/ThemeContext';
+import AiChatbot from './components/AiChatbot';
 
 const Home = lazy(() => import('./pages/Home'));
 const About = lazy(() => import('./pages/About'));
@@ -15,14 +18,52 @@ const Contact = lazy(() => import('./pages/Contact'));
 const Admin = lazy(() => import('./pages/Admin'));
 
 const PageLoader = () => (
-  <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '80vh', color: 'var(--primary)' }}>
-    <div className="spinner-border border-2" role="status" style={{ width: '3rem', height: '3rem' }}>
-      <span className="visually-hidden">Loading...</span>
+  <div style={{
+    minHeight: '80vh',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '1.5rem',
+    color: 'var(--primary)',
+    fontFamily: 'var(--font-heading)',
+  }}>
+    <div style={{ position: 'relative', width: '64px', height: '64px' }}>
+      {/* Outer ring */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        borderRadius: '50%',
+        border: '2px solid transparent',
+        borderTopColor: 'var(--primary)',
+        borderRightColor: 'var(--secondary)',
+        animation: 'spin 1s cubic-bezier(0.5,0,0.5,1) infinite',
+      }} />
+      {/* Inner ring */}
+      <div style={{
+        position: 'absolute', inset: '14px',
+        borderRadius: '50%',
+        border: '2px solid transparent',
+        borderBottomColor: 'var(--accent)',
+        animation: 'spin 0.7s cubic-bezier(0.5,0,0.5,1) infinite reverse',
+      }} />
+      {/* Center dot */}
+      <div style={{
+        position: 'absolute', inset: '28px',
+        borderRadius: '50%',
+        background: 'var(--primary)',
+        boxShadow: '0 0 12px var(--primary)',
+        animation: 'pulse-glow 1.5s ease-in-out infinite',
+      }} />
     </div>
+    <div style={{ fontSize: '0.85rem', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--text-dim)', opacity: 0.8 }}>
+      Loading…
+    </div>
+    <style>{`
+      @keyframes spin { to { transform: rotate(360deg); } }
+      @keyframes pulse-glow { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+    `}</style>
   </div>
 );
-import { LanguageProvider } from './context/LanguageContext';
-import AiChatbot from './components/AiChatbot';
 
 // Scroll-to-top + progress bar wrapper
 function ScrollFeatures() {
@@ -62,16 +103,16 @@ function ScrollFeatures() {
 
 function AppContent() {
   useAnimations();
-  
+
   React.useEffect(() => {
     const cursorDot = document.querySelector('.cursor-dot');
     const cursorCircle = document.querySelector('.cursor-circle');
-    
+
     if (cursorDot && cursorCircle) {
       window.addEventListener('mousemove', (e) => {
         cursorDot.style.left = e.clientX + 'px';
         cursorDot.style.top = e.clientY + 'px';
-        
+
         setTimeout(() => {
           cursorCircle.style.left = e.clientX + 'px';
           cursorCircle.style.top = e.clientY + 'px';
@@ -95,14 +136,14 @@ function AppContent() {
         <div className="cursor-dot"></div>
         <div className="cursor-circle"></div>
       </div>
-      
+
       <div className="universe-bg">
         <div className="nebula-layer"></div>
         <div className="star-field"></div>
         <div className="aurora-glow"></div>
         <div className="grid-mesh"></div>
       </div>
-      
+
       <ScrollFeatures />
       <Navbar />
       <main className="flex-grow-1 position-relative z-1">
@@ -128,11 +169,13 @@ function AppContent() {
 
 function App() {
   return (
-    <LanguageProvider>
-      <Router>
-        <AppContent />
-      </Router>
-    </LanguageProvider>
+    <ThemeProvider>
+      <LanguageProvider>
+        <Router>
+          <AppContent />
+        </Router>
+      </LanguageProvider>
+    </ThemeProvider>
   );
 }
 
