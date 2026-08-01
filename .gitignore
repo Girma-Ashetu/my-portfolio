@@ -11,4 +11,5 @@ uploads/
 *.pem
 .nyc_output
 coverage/
+dist/
 .vercel
