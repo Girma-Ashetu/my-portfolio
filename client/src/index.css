@@ -240,3 +240,22 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); box-sha
 /* Final polish: subtle focus-visible for keyboard users */
 :focus-visible { outline: 3px solid rgba(37,99,235,0.18); outline-offset: 2px; }
 
+/* Mobile overflow & flex shrink fixes (non-invasive) */
+* { box-sizing: border-box; }
+html, body, #root { min-width: 0; overflow-x: hidden; }
+/* Allow flex/grid children to shrink on small viewports */
+:root, .container, .card, .hero-visual, .hero-avatar-scene, .visual-container, .profile-mask, .avatar-frame, .gaia-panel, .loading-core { max-width: 100%; min-width: 0; box-sizing: border-box; }
+/* Media and canvas safeguards */
+img, picture, video, canvas, svg { max-width: 100%; height: auto; display: block; }
+/* Prevent long words or code blocks from causing horizontal overflow */
+* { word-wrap: break-word; -webkit-font-feature-settings: 'liga' 0; }
+/* Ensure inputs and buttons can shrink on small screens */
+input, textarea, select, button { min-width: 0; }
+/* Extra safeguard for any absolutely-positioned visual elements */
+.hero-avatar-scene, .visual-container, .profile-mask { width: 100% !important; max-width: 600px !important; margin-left: auto; margin-right: auto; }
+/* On very small screens, further reduce heavy panels */
+@media (max-width: 420px) {
+  .gaia-panel, .hero-avatar-scene, .visual-container { max-width: calc(100vw - 24px) !important; width: auto !important; left: 12px !important; right: 12px !important; }
+}
+
+
