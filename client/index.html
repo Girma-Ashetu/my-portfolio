@@ -53,6 +53,25 @@
   <canvas id="particleCanvas"></canvas>
 
   <div id="root"></div>
+  <script>
+    (function(){
+      function setLazy(img){ try{ if(img && !img.loading) img.loading='lazy'; }catch(e){}
+      }
+      document.addEventListener('DOMContentLoaded', function(){
+        document.querySelectorAll('img').forEach(setLazy);
+        new MutationObserver(function(mutations){
+          mutations.forEach(function(m){
+            m.addedNodes.forEach(function(node){
+              if(node.nodeType===1){
+                if(node.tagName==='IMG') setLazy(node);
+                node.querySelectorAll && node.querySelectorAll('img').forEach(setLazy);
+              }
+            });
+          });
+        }).observe(document.body, { childList: true, subtree: true });
+      });
+    })();
+  </script>
   <script type="module" src="/src/main.jsx"></script>
   <script src="/script.js" defer></script>
 </body>
