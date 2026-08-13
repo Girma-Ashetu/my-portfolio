@@ -520,7 +520,7 @@ export default function Home() {
                     <picture>
                       <source srcSet="/about_profile-1024.avif 1024w, /about_profile-768.avif 768w, /about_profile-480.avif 480w" type="image/avif" />
                       <source srcSet="/about_profile-1024.webp 1024w, /about_profile-768.webp 768w, /about_profile-480.webp 480w" type="image/webp" />
-                      <img src="/about_profile.jpg" alt="Girma Ashetu Asefa" className="avatar-img" loading="lazy" decoding="async" />
+                      <img src="/about_profile.jpg" alt="Girma Ashetu Asefa" className="avatar-img" loading="eager" fetchpriority="high" decoding="async" />
                     </picture>
                   </div>
                 </div>

@@ -33,6 +33,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
   <!-- Critical inline CSS: minimal above-the-fold rules to paint header/hero quickly -->
+  <!-- Preload hero LCP image for faster Largest Contentful Paint on mobile -->
+  <link rel="preload" as="image" href="/about_profile.jpg">
   <style id="critical-css">:root{--text:#374151;--text-h:#0f172a;--bg:#ffffff;--accent:#2563eb;--sans:Inter,system-ui,'Segoe UI',Roboto,sans-serif;--heading:'Outfit',system-ui,'Segoe UI',Roboto,sans-serif}
   html,body{margin:0;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
   #root{width:100%;max-width:1126px;margin:0 auto;text-align:center;min-height:100svh;display:flex;flex-direction:column;box-sizing:border-box}
