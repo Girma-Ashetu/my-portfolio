@@ -39,7 +39,11 @@ function Navbar() {
         {/* ── Brand ── */}
         <Link className="master-brand" to="/" onClick={() => setIsOpen(false)}>
           <div className="master-avatar-wrap">
-            <img src="/about_profile.jpg" alt="Girma" />
+            <picture>
+              <source srcSet="/about_profile-768.avif 768w, /about_profile-480.avif 480w" type="image/avif" />
+              <source srcSet="/about_profile-768.webp 768w, /about_profile-480.webp 480w" type="image/webp" />
+              <img src="/about_profile.jpg" alt="Girma" loading="lazy" decoding="async" />
+            </picture>
             <div className="master-avatar-ring"></div>
             <span className="master-avatar-status"></span>
           </div>

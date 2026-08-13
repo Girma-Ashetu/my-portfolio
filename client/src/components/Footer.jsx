@@ -59,7 +59,11 @@ function Footer() {
             <div className="footer-brand-header mb-3">
               <Link to="/" className="footer-brand">
                 <div className="footer-avatar-wrap">
-                  <img src="/about_profile.jpg" alt="Girma Ashetu" />
+                  <picture>
+                    <source srcSet="/about_profile-1024.avif 1024w, /about_profile-768.avif 768w, /about_profile-480.avif 480w" type="image/avif" />
+                    <source srcSet="/about_profile-1024.webp 1024w, /about_profile-768.webp 768w, /about_profile-480.webp 480w" type="image/webp" />
+                    <img src="/about_profile.jpg" alt="Girma Ashetu" loading="lazy" decoding="async" />
+                  </picture>
                 </div>
                 <div className="footer-brand-title">
                   <span className="brand-text">Girma<span className="text-primary">.</span></span>
