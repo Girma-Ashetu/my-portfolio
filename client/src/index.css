@@ -1,22 +1,21 @@
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  --text: #374151; /* gray-700 - improved readability */
+  --text-h: #0f172a; /* gray-900 for headings */
+  --bg: #ffffff;
+  --border: #e6e7eb;
+  --code-bg: #f8fafc;
+  --accent: #2563eb; /* blue-600 - modern neutral accent */
+  --accent-bg: rgba(37,99,235,0.08);
+  --accent-border: rgba(37,99,235,0.18);
+  --social-bg: rgba(243,244,246,0.6);
+  --shadow: rgba(2,6,23,0.06) 0 8px 20px -6px, rgba(15,23,42,0.04) 0 4px 6px -2px;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  --sans: Inter, system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: 'Outfit', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', monospace;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
+  font: 18px/1.6 var(--sans);
+  letter-spacing: 0;
   color-scheme: light dark;
   color: var(--text);
   background: var(--bg);
@@ -32,35 +31,105 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+    --text: #cbd5e1; /* lighter gray for body text */
+    --text-h: #f8fafc; /* near-white for headings */
+    --bg: #0b1220; /* deep neutral background */
+    --border: #1f2937;
+    --code-bg: #071024;
+    --accent: #3b82f6; /* bright blue accent in dark mode */
+    --accent-bg: rgba(59,130,246,0.08);
+    --accent-border: rgba(59,130,246,0.18);
+    --social-bg: rgba(17,24,39,0.6);
+    --shadow: rgba(2,6,23,0.6) 0 10px 30px -6px, rgba(2,6,23,0.25) 0 6px 10px -4px;
   }
 
   #social .button-icon {
-    filter: invert(1) brightness(2);
+    filter: invert(1) brightness(1.6);
   }
 }
 
 body {
   margin: 0;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+/* Global typographic & UI tweaks for improved legibility */
+
+/* Links */
+a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: color .12s ease, border-color .12s ease;
+}
+a:hover, a:focus {
+  border-bottom-color: var(--accent);
+  outline: none;
+}
+
+/* Buttons (generic fallback to improve visual consistency) */
+button, .btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 0.55rem 0.9rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+button[disabled], .btn[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Inline code */
+code {
+  background: var(--code-bg);
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: var(--text-h);
+}
+
+/* Headings: strong, clear hierarchy */
+h1, h2, h3, h4 {
+  color: var(--text-h);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+/* Improve paragraph spacing for readability */
+p {
+  margin-bottom: 1rem;
+  line-height: 1.7;
+}
+
+/* Ensure form controls are legible */n
+input, textarea, select {
+  border: 1px solid var(--border);
+  background: transparent;
+  padding: 0.5rem 0.65rem;
+  border-radius: 6px;
+}
+
+/* Subtle focus ring that respects theme */
+:focus {
+  outline: 3px solid rgba(37,99,235,0.12);
+  outline-offset: 2px;
+}
+
+
 #root {
-  width: 1126px;
-  max-width: 100%;
+  width: 100%;
+  max-width: 1126px;
   margin: 0 auto;
   text-align: center;
   border-inline: 1px solid var(--border);
   min-height: 100svh;
+  min-height: 100vh; /* fallback for browsers without svh */
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -109,3 +178,84 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+/* -----------------------
+   Modern design system
+   - Improves global rhythm, spacing, and components
+   - Minimal, neutral, high-contrast visual language
+   ----------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+/* Layout container helpers */
+.container { width: 100%; max-width: 1180px; margin: 0 auto; padding-left: 1rem; padding-right: 1rem; }
+.container-sm { max-width: 880px; }
+.container-md { max-width: 1040px; }
+
+/* Responsive typographic scale */
+h1 { font-size: clamp(2.25rem, 3.6vw, 3.5rem); line-height: 1.05; margin: 1rem 0; }
+h2 { font-size: clamp(1.5rem, 2.4vw, 2.125rem); margin: 0.75rem 0; }
+h3 { font-size: clamp(1.125rem, 1.8vw, 1.25rem); margin: 0.6rem 0; }
+.lead { font-size: clamp(1rem, 1.6vw, 1.125rem); color: var(--text); }
+
+/* Card component */
+.card { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0)); border-radius: 12px; padding: 1.25rem; box-shadow: var(--shadow); border: 1px solid rgba(16,24,40,0.04); transition: transform .18s ease, box-shadow .18s ease; }
+.card:hover { transform: translateY(-6px); box-shadow: 0 12px 30px rgba(2,6,23,0.08); }
+.card-title { font-weight: 700; color: var(--text-h); margin-bottom: 0.5rem; }
+.card-sub { color: rgba(55,65,81,0.8); font-size: 0.95rem; }
+
+/* Buttons modern variants */
+.btn-primary { background: var(--accent); color: #fff; border-radius: 10px; padding: 0.6rem 1rem; border: none; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 6px 20px rgba(37,99,235,0.12); transition: transform .12s ease, box-shadow .12s ease; }
+.btn-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(37,99,235,0.14); }
+.btn-outline { background: transparent; color: var(--accent); border: 1.5px solid var(--accent); border-radius: 10px; padding: 0.55rem 0.95rem; }
+
+/* Form controls */
+input, textarea, select { background: var(--bg); color: var(--text); border-radius: 8px; border: 1px solid var(--border); transition: box-shadow .12s ease, border-color .12s ease; }
+input:focus, textarea:focus, select:focus { border-color: var(--accent); box-shadow: 0 6px 18px rgba(37,99,235,0.08); }
+
+/* Navigation / header */
+.glass-navbar { backdrop-filter: blur(6px); background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.4)); border-bottom: 1px solid rgba(16,24,40,0.04); }
+.glass-navbar.scrolled { background: rgba(255,255,255,0.82); box-shadow: 0 6px 24px rgba(2,6,23,0.06); }
+@media (prefers-color-scheme: dark) { .glass-navbar { background: linear-gradient(180deg, rgba(9,12,20,0.6), rgba(9,12,20,0.4)); border-bottom-color: rgba(255,255,255,0.03); } }
+
+/* Images */
+.responsive-img, img { width: 100%; max-width: 100%; height: auto; display: block; border-radius: 8px; object-fit: cover; }
+
+/* Utility text */
+.muted { color: rgba(55,65,81,0.6); }
+.small { font-size: 0.85rem; }
+
+/* Smooth utilities */
+.smooth-transition { transition: all .14s ease-in-out; }
+
+/* Accessibility helpers */
+.sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+
+/* Ensure comfortable spacing on mobile */
+@media (max-width: 640px) {
+  .container { padding-left: 0.75rem; padding-right: 0.75rem; }
+  h1 { margin-top: 0.6rem; margin-bottom: 0.6rem; }
+  .card { padding: 1rem; border-radius: 10px; }
+}
+
+/* Final polish: subtle focus-visible for keyboard users */
+:focus-visible { outline: 3px solid rgba(37,99,235,0.18); outline-offset: 2px; }
+
+/* Mobile overflow & flex shrink fixes (non-invasive) */
+* { box-sizing: border-box; }
+html, body, #root { min-width: 0; overflow-x: hidden; }
+/* Allow flex/grid children to shrink on small viewports */
+:root, .container, .card, .hero-visual, .hero-avatar-scene, .visual-container, .profile-mask, .avatar-frame, .gaia-panel, .loading-core { max-width: 100%; min-width: 0; box-sizing: border-box; }
+/* Media and canvas safeguards */
+img, picture, video, canvas, svg { max-width: 100%; height: auto; display: block; }
+/* Prevent long words or code blocks from causing horizontal overflow */
+* { word-wrap: break-word; -webkit-font-feature-settings: 'liga' 0; }
+/* Ensure inputs and buttons can shrink on small screens */
+input, textarea, select, button { min-width: 0; }
+/* Extra safeguard for any absolutely-positioned visual elements */
+.hero-avatar-scene, .visual-container, .profile-mask { width: 100% !important; max-width: 600px !important; margin-left: auto; margin-right: auto; }
+/* On very small screens, further reduce heavy panels */
+@media (max-width: 420px) {
+  .gaia-panel, .hero-avatar-scene, .visual-container { max-width: calc(100vw - 24px) !important; width: auto !important; left: 12px !important; right: 12px !important; }
+}
+
+

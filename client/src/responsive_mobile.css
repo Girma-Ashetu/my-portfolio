@@ -506,3 +506,21 @@ img {
     content-visibility: auto;
     contain-intrinsic-size: 0 500px;
 }
+
+/* Hide heavy animated background and canvas on small or touch devices */
+@media (max-width: 767.98px), (pointer: coarse) {
+    .universe-background,
+    #particleCanvas,
+    .bg-mouse-glow { display: none !important; visibility: hidden !important; }
+}
+
+/* Respect reduced motion preference: disable heavy animations */
+@media (prefers-reduced-motion: reduce) {
+    .universe-background,
+    #particleCanvas,
+    .bg-nebula-deep,
+    .bg-nebula-mid,
+    .bg-stars-near,
+    .bg-stars-far,
+    .bg-data-streams { animation: none !important; transition: none !important; opacity: 0.01 !important; }
+}

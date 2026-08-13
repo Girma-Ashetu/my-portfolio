@@ -89,7 +89,11 @@ function About() {
                                 <div className="about-avatar-ring ar-1"></div>
                                 <div className="about-avatar-ring ar-2"></div>
                                 <div className="about-avatar-frame">
-                                    <img src="/about_profile.jpg" alt="Girma Ashetu Asefa" className="about-img" />
+                                    <picture>
+                                        <source srcSet="/about_profile-1024.avif 1024w, /about_profile-768.avif 768w, /about_profile-480.avif 480w" type="image/avif" />
+                                        <source srcSet="/about_profile-1024.webp 1024w, /about_profile-768.webp 768w, /about_profile-480.webp 480w" type="image/webp" />
+                                        <img src="/about_profile.jpg" alt="Girma Ashetu Asefa" className="about-img" loading="lazy" decoding="async" />
+                                    </picture>
                                     <div className="about-img-overlay"></div>
                                 </div>
                                 {/* Floating Info Badges */}

@@ -31,11 +31,48 @@
   <link rel="icon" type="image/jpeg" href="/about_profile.jpg" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap"
-    rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Critical inline CSS: minimal above-the-fold rules to paint header/hero quickly -->
+  <!-- Preload hero LCP image for faster Largest Contentful Paint on mobile -->
+  <link rel="preload" as="image" href="/about_profile.jpg">
+  <style id="critical-css">:root{--text:#374151;--text-h:#0f172a;--bg:#ffffff;--accent:#2563eb;--sans:Inter,system-ui,'Segoe UI',Roboto,sans-serif;--heading:'Outfit',system-ui,'Segoe UI',Roboto,sans-serif}
+  html,body{margin:0;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+  #root{width:100%;max-width:1126px;margin:0 auto;text-align:center;min-height:100svh;display:flex;flex-direction:column;box-sizing:border-box}
+  h1,h2{font-family:var(--heading);color:var(--text-h);line-height:1.15}
+  h1{font-size:clamp(2.25rem,3.6vw,3.5rem);margin:1rem 0}
+  .container{width:100%;max-width:1180px;margin:0 auto;padding:0 1rem}
+  img,picture,canvas,svg{max-width:100%;height:auto;display:block}
+  /* Defer heavy animated background until JS decides to enable it (improves LCP) */
+  .universe-background,#particleCanvas{display:none;visibility:hidden}
+  </style>
+
+  <!-- Preload external stylesheets (non-blocking) with noscript fallback -->
+  <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" as="style" onload="this.rel='stylesheet'">
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap" as="style" onload="this.rel='stylesheet'">
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.rel='stylesheet'">
+  <noscript>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  </noscript>
+  <script>
+    // Re-enable heavy background once JS is ready (keeps initial paint fast)
+    (function(){
+      function enableBg(){
+        try{
+          var bg=document.querySelector('.universe-background');
+          var canvas=document.getElementById('particleCanvas');
+          if(bg){ bg.style.display=''; bg.style.visibility=''; }
+          if(canvas){ canvas.style.display=''; canvas.style.visibility=''; }
+        }catch(e){}
+      }
+      if(document.readyState==='complete' || document.readyState==='interactive'){
+        setTimeout(enableBg, 300);
+      } else {
+        window.addEventListener('DOMContentLoaded', function(){ setTimeout(enableBg,300); });
+      }
+    })();
+  </script>
 </head>
 
 <body class="bg-deep">
@@ -53,6 +90,25 @@
   <canvas id="particleCanvas"></canvas>
 
   <div id="root"></div>
+  <script>
+    (function(){
+      function setLazy(img){ try{ if(img && !img.loading) img.loading='lazy'; }catch(e){}
+      }
+      document.addEventListener('DOMContentLoaded', function(){
+        document.querySelectorAll('img').forEach(setLazy);
+        new MutationObserver(function(mutations){
+          mutations.forEach(function(m){
+            m.addedNodes.forEach(function(node){
+              if(node.nodeType===1){
+                if(node.tagName==='IMG') setLazy(node);
+                node.querySelectorAll && node.querySelectorAll('img').forEach(setLazy);
+              }
+            });
+          });
+        }).observe(document.body, { childList: true, subtree: true });
+      });
+    })();
+  </script>
   <script type="module" src="/src/main.jsx"></script>
   <script src="/script.js" defer></script>
 </body>
