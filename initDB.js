@@ -78,7 +78,10 @@ async function initDB() {
                 description TEXT NOT NULL,
                 long_description TEXT,
                 technologies VARCHAR(255) NOT NULL,
-                link VARCHAR(255),
+                link VARCHAR(2048),
+                demo_url VARCHAR(2048),
+                case_study TEXT,
+                featured TINYINT(1) NOT NULL DEFAULT 0,
                 image_url VARCHAR(255),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )

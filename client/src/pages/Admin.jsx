@@ -1,613 +1,111 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useTheme } from '../context/ThemeContext';
-import './admin.css';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { safeUrl } from '../data/projects';
+import ProjectVisual from '../components/ProjectVisual';
+import { caseStudyFields } from '../data/caseStudies';
+import { projectsChanged } from '../data/projectStore';
+import { loadStudioSections } from '../data/studioLoader';
+import './admin-studio.css';
 
-function Admin() {
-  const { theme, toggleTheme } = useTheme();
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [messages, setMessages] = useState([]);
-  const [readIds, setReadIds] = useState(new Set());
+const emptyProject = { title: '', description: '', long_description: '', technologies: '', link: '', demo_url: '', image_url: '', featured: false, case_study: {} };
+function readToken() { try { return localStorage.getItem('token') || ''; } catch { return ''; } }
+export default function Admin() {
+  const [token, setToken] = useState(readToken);
+  const [credentials, setCredentials] = useState({ username: '', password: '' });
   const [projects, setProjects] = useState([]);
-  const [projectSearch, setProjectSearch] = useState('');
-  const [msgSearch, setMsgSearch] = useState('');
-  const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState('dashboard');
-
-  // Project form state
-  const [isProjectFormOpen, setIsProjectFormOpen] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [projectForm, setProjectForm] = useState({
-    title: '', description: '', long_description: '', technologies: '', link: '', image_url: '', imageFile: null
-  });
-  const [imagePreview, setImagePreview] = useState(null);
-  const [saveMsg, setSaveMsg] = useState('');
-
-  const authHeader = () => ({ headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
-
-  const fetchAdminData = () => {
-    axios.get('/api/admin/messages', authHeader())
-      .then(res => setMessages(Array.isArray(res.data) ? res.data : []))
-      .catch(err => { if (err.response?.status === 401) handleLogout(); });
-
-    axios.get('/api/projects')
-      .then(res => setProjects(Array.isArray(res.data) ? res.data : []))
-      .catch(console.error);
-  };
-
-  useEffect(() => { if (isLoggedIn) fetchAdminData(); }, [isLoggedIn]);
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  const [messages, setMessages] = useState([]);
+  const [tab, setTab] = useState('projects');
+  const [form, setForm] = useState(null);
+  const [demo, setDemo] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [notice, setNotice] = useState(null);
+  const [query, setQuery] = useState('');
+  const [loadErrors, setLoadErrors] = useState({ projects: null, messages: null });
+  const [reload, setReload] = useState(0);
+  const logout = () => { try { localStorage.removeItem('token'); } catch {} setToken(''); setProjects([]); setMessages([]); setForm(null); setDemo(null); };
+  async function api(path, options = {}) {
+    let response;
     try {
-      const res = await axios.post('/api/admin/login', { username, password });
-      localStorage.setItem('token', res.data.token);
-      setIsLoggedIn(true);
-      setError('');
-    } catch {
-      setError('Access Denied. Use Admin ID: "admin" and Passcode: "admin123"');
+      response = await fetch(path, { ...options, signal: AbortSignal.timeout(12000), cache: 'no-store', headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}), ...options.headers } });
+    } catch (error) {
+      throw new Error(error.name === 'TimeoutError' ? 'The API did not respond in time. Check that the backend is running, then retry.' : 'Cannot reach the portfolio API. Start the backend with npm start, then retry.');
     }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    setIsLoggedIn(false);
-  };
-
-  const markRead = (id) => {
-    setReadIds(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
-  };
-
-  const openAddProject = () => {
-    setEditingId(null);
-    setProjectForm({ title: '', description: '', long_description: '', technologies: '', link: '', image_url: '', imageFile: null });
-    setImagePreview(null);
-    setSaveMsg('');
-    setIsProjectFormOpen(true);
-  };
-
-  const openEditProject = (p) => {
-    setEditingId(p.id);
-    setProjectForm({ title: p.title, description: p.description, long_description: p.long_description, technologies: p.technologies, link: p.link, image_url: p.image_url, imageFile: null });
-    setImagePreview(p.image_url ? `/${p.image_url}` : null);
-    setSaveMsg('');
-    setIsProjectFormOpen(true);
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setProjectForm(f => ({ ...f, imageFile: file }));
-      setImagePreview(URL.createObjectURL(file));
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403 || data.message === 'Invalid token') logout();
+      throw new Error(data.message || ([502, 503, 504].includes(response.status) ? 'The portfolio API is unavailable. Check that the backend (npm start) and MySQL80 are running, then retry.' : 'The request could not be completed. Please try again.'));
     }
-  };
-
-  const handleSaveProject = async (e) => {
-    e.preventDefault();
-    const fd = new FormData();
-    fd.append('title', projectForm.title);
-    fd.append('description', projectForm.description);
-    fd.append('long_description', projectForm.long_description);
-    fd.append('technologies', projectForm.technologies);
-    fd.append('link', projectForm.link);
-    if (projectForm.image_url) fd.append('image_url', projectForm.image_url);
-    if (projectForm.imageFile) fd.append('image', projectForm.imageFile);
-
-    const cfg = { headers: { Authorization: `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'multipart/form-data' } };
-    try {
-      if (editingId) {
-        await axios.put(`/api/admin/projects/${editingId}`, fd, cfg);
-      } else {
-        await axios.post('/api/admin/projects', fd, cfg);
-      }
-      setSaveMsg('✅ Project saved successfully!');
-      setTimeout(() => { setIsProjectFormOpen(false); fetchAdminData(); }, 1200);
-    } catch {
-      setSaveMsg('❌ Failed to save project. Please try again.');
-    }
-  };
-
-  const handleDeleteProject = async (id) => {
-    if (!window.confirm('Delete this project permanently?')) return;
-    try {
-      await axios.delete(`/api/admin/projects/${id}`, authHeader());
-      fetchAdminData();
-    } catch { alert('Failed to delete'); }
-  };
-
-  const handleDeleteMessage = async (id) => {
-    if (!window.confirm('Delete this message permanently?')) return;
-    try {
-      await axios.delete(`/api/admin/messages/${id}`, authHeader());
-      fetchAdminData();
-    } catch { alert('Failed to delete'); }
-  };
-
-  const replyByEmail = (email, name) => {
-    const subject = encodeURIComponent(`Re: Your message — Girma Ashetu`);
-    const body = encodeURIComponent(`Hi ${name},\n\nThank you for reaching out through my portfolio. I'd be happy to connect!\n\n— Girma Ashetu\ngirme405@gmail.com`);
-    window.open(`https://mail.google.com/mail/?view=cm&to=${email}&su=${subject}&body=${body}`, '_blank', 'noopener,noreferrer');
-  };
-
-  const filteredProjects = projects.filter(p =>
-    p.title?.toLowerCase().includes(projectSearch.toLowerCase()) ||
-    p.technologies?.toLowerCase().includes(projectSearch.toLowerCase())
-  );
-
-  const filteredMessages = messages.filter(m =>
-    m.name?.toLowerCase().includes(msgSearch.toLowerCase()) ||
-    m.email?.toLowerCase().includes(msgSearch.toLowerCase()) ||
-    m.message?.toLowerCase().includes(msgSearch.toLowerCase())
-  );
-
-  const unreadCount = messages.filter(m => !readIds.has(m.id)).length;
-
-  // ── Login Screen ─────────────────────────────────────────────────────────────
-  if (!isLoggedIn) {
-    return (
-      <div className="admin-login-wrapper">
-        <div className="admin-login-bg-glow" />
-        <div className="login-panel reveal-up">
-          {/* Theme toggle on login */}
-          <div className="login-theme-row">
-            <button type="button" className="admin-theme-converter-btn" onClick={toggleTheme}>
-              {theme === 'dark'
-                ? <><i className="fas fa-sun" /><span>Light Mode</span></>
-                : <><i className="fas fa-moon" /><span>Dark Mode</span></>
-              }
-            </button>
-          </div>
-
-          <div className="login-icon-wrap">
-            <i className="fas fa-fingerprint" />
-            <div className="login-icon-ring" />
-          </div>
-          <h2 className="admin-login-title">System Access</h2>
-          <p className="admin-login-sub">Authenticated administrators only</p>
-
-          {error && (
-            <div className="admin-login-error">
-              <i className="fas fa-exclamation-triangle me-2" />{error}
-            </div>
-          )}
-
-          <form onSubmit={handleLogin} className="admin-login-form">
-            <div className="input-master-wrapper mb-4">
-              <input
-                type="text"
-                className="input-master"
-                required
-                value={username}
-                onChange={e => setUsername(e.target.value)}
-                placeholder=" "
-                autoComplete="username"
-              />
-              <label className={username ? 'active' : ''}>Admin ID</label>
-              <div className="input-border-glow" />
-            </div>
-            <div className="input-master-wrapper mb-4">
-              <input
-                type="password"
-                className="input-master"
-                required
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                placeholder=" "
-                autoComplete="current-password"
-              />
-              <label className={password ? 'active' : ''}>Passcode</label>
-              <div className="input-border-glow" />
-            </div>
-            <button type="submit" className="btn-masterpiece-primary w-100 mt-2">
-              <span className="btn-bg-slide" />
-              <span className="btn-content" style={{ justifyContent: 'center' }}>
-                <i className="fas fa-lock-open me-2" /> Authenticate
-              </span>
-            </button>
-          </form>
-        </div>
-      </div>
-    );
+    return data;
   }
-
-  // ── Dashboard ─────────────────────────────────────────────────────────────────
-  return (
-    <div className="admin-layout">
-
-      {/* Sidebar */}
-      <aside className="admin-sidebar">
-        <div className="admin-sidebar-header">
-          <div className="admin-brand-icon">
-            <i className="fas fa-shield-alt" />
-          </div>
-          <h5 className="admin-sidebar-title">Admin <span>Center</span></h5>
-          <span className="admin-online-badge">
-            <span className="status-pulse" />Online
-          </span>
-        </div>
-
-        {/* Mode Converter */}
-        <div className="admin-theme-converter-box">
-          <span className="theme-converter-label">
-            <i className="fas fa-palette me-1" /> Interface Mode
-          </span>
-          <button type="button" className="theme-converter-toggle-btn" onClick={toggleTheme}>
-            {theme === 'dark'
-              ? <><i className="fas fa-moon" /> Cosmic Dark</>
-              : <><i className="fas fa-sun" /> Daylight Mode</>
-            }
-          </button>
-        </div>
-
-        <nav className="admin-nav">
-          {[
-            { id: 'dashboard', icon: 'fa-chart-pie', label: 'Dashboard', badge: null },
-            { id: 'projects', icon: 'fa-layer-group', label: 'Portfolio DB', badge: projects.length || null },
-            { id: 'messages', icon: 'fa-envelope-open-text', label: 'Comm Logs', badge: unreadCount || null },
-          ].map(item => (
-            <div
-              key={item.id}
-              className={`admin-nav-item ${activeTab === item.id ? 'active' : ''}`}
-              onClick={() => { setActiveTab(item.id); setIsProjectFormOpen(false); }}
-            >
-              <i className={`fas ${item.icon}`} />
-              <span>{item.label}</span>
-              {item.badge ? <span className="admin-nav-badge">{item.badge}</span> : null}
-            </div>
-          ))}
-        </nav>
-
-        <button className="admin-logout-btn" onClick={handleLogout}>
-          <i className="fas fa-power-off" /> Terminate Session
-        </button>
-      </aside>
-
-      {/* Main Content */}
-      <main className="admin-main-content">
-
-        {/* ── Dashboard Overview ── */}
-        {activeTab === 'dashboard' && !isProjectFormOpen && (
-          <div className="reveal-up">
-            <div className="admin-page-header">
-              <div>
-                <h3 className="admin-page-title">Overview Metrics</h3>
-                <p className="admin-page-sub">Real-time portfolio system status</p>
-              </div>
-              <button className="admin-refresh-btn" onClick={fetchAdminData} title="Refresh data">
-                <i className="fas fa-sync-alt" />
-              </button>
-            </div>
-
-            <div className="dashboard-widget-grid">
-              <div className="admin-widget" onClick={() => setActiveTab('projects')} style={{ cursor: 'pointer' }}>
-                <div className="widget-icon-box widget-icon-primary">
-                  <i className="fas fa-project-diagram" />
-                </div>
-                <div className="widget-info">
-                  <h5>Total Projects</h5>
-                  <h2>{projects.length}</h2>
-                  <span className="widget-cta">View all →</span>
-                </div>
-              </div>
-              <div className="admin-widget" onClick={() => setActiveTab('messages')} style={{ cursor: 'pointer' }}>
-                <div className="widget-icon-box widget-icon-secondary">
-                  <i className="fas fa-inbox" />
-                </div>
-                <div className="widget-info">
-                  <h5>Total Messages</h5>
-                  <h2>{messages.length}</h2>
-                  {unreadCount > 0 && <span className="widget-unread-badge">{unreadCount} unread</span>}
-                </div>
-              </div>
-              <div className="admin-widget">
-                <div className="widget-icon-box widget-icon-accent">
-                  <i className="fas fa-server" />
-                </div>
-                <div className="widget-info">
-                  <h5>System Status</h5>
-                  <h2 className="text-success" style={{ fontSize: '1.6rem' }}>Optimal</h2>
-                  <span className="widget-cta" style={{ color: '#4ade80' }}>All systems go ✓</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="admin-panel">
-              <div className="admin-panel-header">
-                <h5 className="admin-panel-title">Recent Messages</h5>
-                <button className="admin-view-all-btn" onClick={() => setActiveTab('messages')}>
-                  View All <i className="fas fa-arrow-right ms-1" />
-                </button>
-              </div>
-              {messages.slice(0, 3).length === 0 ? (
-                <div className="admin-empty-state">
-                  <i className="fas fa-wave-square" />
-                  <p>No messages received yet. Share your portfolio!</p>
-                </div>
-              ) : (
-                <div className="recent-messages-list">
-                  {messages.slice(0, 3).map(msg => (
-                    <div key={msg.id} className="recent-msg-row">
-                      <div className="msg-avatar-sm"><i className="fas fa-user" /></div>
-                      <div className="recent-msg-info">
-                        <span className="recent-msg-name">{msg.name}</span>
-                        <span className="recent-msg-preview">{msg.message?.substring(0, 60)}…</span>
-                      </div>
-                      <span className="recent-msg-time">
-                        {new Date(msg.created_at || msg.timestamp).toLocaleDateString()}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* ── Projects DB ── */}
-        {activeTab === 'projects' && !isProjectFormOpen && (
-          <div className="reveal-up">
-            <div className="admin-page-header">
-              <div>
-                <h3 className="admin-page-title">Portfolio Database</h3>
-                <p className="admin-page-sub">{filteredProjects.length} of {projects.length} projects</p>
-              </div>
-              <button className="btn-masterpiece-primary btn-sm py-2 px-4" onClick={openAddProject}>
-                <span className="btn-bg-slide" />
-                <span className="btn-content"><i className="fas fa-plus me-2" />Deploy New</span>
-              </button>
-            </div>
-
-            {/* Search Bar */}
-            <div className="admin-search-bar mb-4">
-              <i className="fas fa-search admin-search-icon" />
-              <input
-                type="text"
-                className="admin-search-input"
-                placeholder="Search by title or technology…"
-                value={projectSearch}
-                onChange={e => setProjectSearch(e.target.value)}
-              />
-              {projectSearch && (
-                <button className="admin-search-clear" onClick={() => setProjectSearch('')}>
-                  <i className="fas fa-times" />
-                </button>
-              )}
-            </div>
-
-            <div className="admin-panel">
-              <div className="table-responsive">
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Project</th>
-                      <th>Technologies</th>
-                      <th className="text-end">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredProjects.map(p => (
-                      <tr key={p.id}>
-                        <td>
-                          <div className="project-title-cell">
-                            <img
-                              src={`/${p.image_url}`}
-                              alt=""
-                              className="project-thumb"
-                              onError={e => { e.target.src = '/project_ai.png'; }}
-                            />
-                            <div>
-                              <div className="project-name">{p.title}</div>
-                              <div className="project-desc-preview">{p.description?.substring(0, 50)}…</div>
-                            </div>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="tech-tags">
-                            {p.technologies?.split(',').slice(0, 3).map((t, i) => (
-                              <span key={i} className="tech-tag">{t.trim()}</span>
-                            ))}
-                          </div>
-                        </td>
-                        <td className="text-end">
-                          <button onClick={() => openEditProject(p)} className="action-btn edit" title="Edit">
-                            <i className="fas fa-pen" />
-                          </button>
-                          <button onClick={() => handleDeleteProject(p.id)} className="action-btn delete" title="Delete">
-                            <i className="fas fa-trash-alt" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {filteredProjects.length === 0 && (
-                  <div className="admin-empty-state">
-                    <i className="fas fa-search" />
-                    <p>{projectSearch ? `No projects matching "${projectSearch}"` : 'No projects in database yet.'}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ── Project Form ── */}
-        {isProjectFormOpen && (
-          <div className="reveal-up">
-            <div className="admin-panel">
-              <div className="admin-panel-header">
-                <h4 className="admin-panel-title" style={{ color: 'var(--primary)' }}>
-                  <i className={`fas ${editingId ? 'fa-pen' : 'fa-rocket'} me-2`} />
-                  {editingId ? 'Edit Project' : 'Deploy New Project'}
-                </h4>
-                <button className="btn-close btn-close-white" onClick={() => setIsProjectFormOpen(false)} />
-              </div>
-
-              {saveMsg && (
-                <div className={`admin-save-msg ${saveMsg.startsWith('✅') ? 'success' : 'error'}`}>
-                  {saveMsg}
-                </div>
-              )}
-
-              <form onSubmit={handleSaveProject} className="master-form">
-                <div className="form-group-row mb-4">
-                  <div className="input-master-wrapper">
-                    <input type="text" className="input-master" required value={projectForm.title} onChange={e => setProjectForm(f => ({ ...f, title: e.target.value }))} placeholder=" " />
-                    <label className={projectForm.title ? 'active' : ''}>Project Title *</label>
-                    <div className="input-border-glow" />
-                  </div>
-                  <div className="input-master-wrapper">
-                    <input type="text" className="input-master" required value={projectForm.technologies} onChange={e => setProjectForm(f => ({ ...f, technologies: e.target.value }))} placeholder=" " />
-                    <label className={projectForm.technologies ? 'active' : ''}>Technologies (comma separated) *</label>
-                    <div className="input-border-glow" />
-                  </div>
-                </div>
-
-                <div className="input-master-wrapper mb-4">
-                  <input type="text" className="input-master" required value={projectForm.link} onChange={e => setProjectForm(f => ({ ...f, link: e.target.value }))} placeholder=" " />
-                  <label className={projectForm.link ? 'active' : ''}>Project Link / Repo URL *</label>
-                  <div className="input-border-glow" />
-                </div>
-
-                <div className="input-master-wrapper mb-4">
-                  <textarea className="input-master textarea-master" rows="2" required value={projectForm.description} onChange={e => setProjectForm(f => ({ ...f, description: e.target.value }))} placeholder=" " />
-                  <label className={projectForm.description ? 'active' : ''}>Short Description (Grid Card) *</label>
-                  <div className="input-border-glow" />
-                </div>
-
-                <div className="input-master-wrapper mb-4">
-                  <textarea className="input-master textarea-master" rows="4" required value={projectForm.long_description} onChange={e => setProjectForm(f => ({ ...f, long_description: e.target.value }))} placeholder=" " />
-                  <label className={projectForm.long_description ? 'active' : ''}>Long Description (Modal Detail) *</label>
-                  <div className="input-border-glow" />
-                </div>
-
-                {/* Image Upload */}
-                <div className="admin-image-upload-area mb-4">
-                  <div className="upload-preview-row">
-                    {imagePreview && (
-                      <img src={imagePreview} alt="Preview" className="upload-preview-thumb" />
-                    )}
-                    <label className="upload-file-label">
-                      <i className="fas fa-cloud-upload-alt me-2" />
-                      {imagePreview ? 'Change Image' : 'Upload Project Image'}
-                      <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} />
-                    </label>
-                  </div>
-                  <p className="upload-hint">PNG, JPG, WebP — Max 5MB. Recommended: 800×500px</p>
-                </div>
-
-                <div className="d-flex justify-content-end gap-3 mt-4">
-                  <button type="button" className="btn-masterpiece-outline" onClick={() => setIsProjectFormOpen(false)}>
-                    <span className="btn-content">Cancel</span>
-                  </button>
-                  <button type="submit" className="btn-masterpiece-primary px-5">
-                    <span className="btn-bg-slide" />
-                    <span className="btn-content">
-                      <i className="fas fa-save me-2" />{editingId ? 'Save Changes' : 'Deploy Project'}
-                    </span>
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* ── Messages Log ── */}
-        {activeTab === 'messages' && !isProjectFormOpen && (
-          <div className="reveal-up">
-            <div className="admin-page-header">
-              <div>
-                <h3 className="admin-page-title">Communication Logs</h3>
-                <p className="admin-page-sub">{filteredMessages.length} message{filteredMessages.length !== 1 ? 's' : ''} {unreadCount > 0 ? `· ${unreadCount} unread` : ''}</p>
-              </div>
-              <button className="admin-refresh-btn" onClick={fetchAdminData} title="Refresh">
-                <i className="fas fa-sync-alt" />
-              </button>
-            </div>
-
-            {/* Search */}
-            <div className="admin-search-bar mb-4">
-              <i className="fas fa-search admin-search-icon" />
-              <input
-                type="text"
-                className="admin-search-input"
-                placeholder="Search messages…"
-                value={msgSearch}
-                onChange={e => setMsgSearch(e.target.value)}
-              />
-              {msgSearch && (
-                <button className="admin-search-clear" onClick={() => setMsgSearch('')}>
-                  <i className="fas fa-times" />
-                </button>
-              )}
-            </div>
-
-            {filteredMessages.length === 0 ? (
-              <div className="admin-panel">
-                <div className="admin-empty-state">
-                  <i className="fas fa-satellite" />
-                  <p>{msgSearch ? `No messages match "${msgSearch}"` : 'No messages received yet.'}</p>
-                </div>
-              </div>
-            ) : (
-              <div className="row g-4">
-                {filteredMessages.map(msg => {
-                  const isRead = readIds.has(msg.id);
-                  return (
-                    <div key={msg.id} className="col-lg-6">
-                      <div className={`msg-card ${isRead ? 'msg-read' : 'msg-unread'}`}>
-                        {!isRead && <div className="msg-unread-dot" title="Unread" />}
-                        <div className="msg-header">
-                          <div className="msg-avatar"><i className="fas fa-user" /></div>
-                          <div>
-                            <h5 className="msg-name">{msg.name}</h5>
-                            <a href={`mailto:${msg.email}`} className="msg-email">{msg.email}</a>
-                          </div>
-                          <div className="msg-actions-right ms-auto d-flex gap-2">
-                            <button
-                              className="action-btn edit"
-                              title="Reply via Gmail"
-                              onClick={() => replyByEmail(msg.email, msg.name)}
-                            >
-                              <i className="fas fa-reply" />
-                            </button>
-                            <button
-                              className={`action-btn ${isRead ? 'edit' : ''}`}
-                              title={isRead ? 'Mark as unread' : 'Mark as read'}
-                              onClick={() => markRead(msg.id)}
-                            >
-                              <i className={`fas ${isRead ? 'fa-envelope' : 'fa-envelope-open'}`} />
-                            </button>
-                            <button
-                              className="action-btn delete"
-                              title="Delete"
-                              onClick={() => handleDeleteMessage(msg.id)}
-                            >
-                              <i className="fas fa-trash-alt" />
-                            </button>
-                          </div>
-                        </div>
-                        <div className="msg-body">"{msg.message}"</div>
-                        <div className="msg-footer">
-                          <span><i className="far fa-clock me-1" />{new Date(msg.created_at || msg.timestamp || Date.now()).toLocaleString()}</span>
-                          <span className={`msg-status-badge ${isRead ? 'read' : 'unread'}`}>
-                            {isRead ? 'Read' : 'Unread'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
-
-      </main>
-    </div>
-  );
+  useEffect(() => {
+    if (!token) return;
+    let active = true;
+    setLoading(true);
+    setNotice(null);
+    loadStudioSections(api).then(result => {
+      if (active) {
+        if (result.projects.data) setProjects(result.projects.data);
+        if (result.messages.data) setMessages(result.messages.data);
+        setLoadErrors({ projects: result.projects.error, messages: result.messages.error });
+      }
+    }).catch(error => { if (active) setNotice({ type: 'error', text: error.message }); }).finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [token, reload]);
+  async function login(event) {
+    event.preventDefault(); setBusy(true); setNotice(null);
+    try {
+      const data = await api('/api/admin/login', { method: 'POST', body: JSON.stringify(credentials) });
+      if (!data.token) throw new Error('Sign in failed. Please try again.');
+      try { localStorage.setItem('token', data.token); } catch {}
+      setToken(data.token); setCredentials({ username: '', password: '' });
+    } catch (error) { setNotice({ type: 'error', text: error.message }); }
+    finally { setBusy(false); }
+  }
+  function acceptSaved(data) {
+    if (!data.project?.id) throw new Error('The server did not confirm the saved project.');
+    setProjects(previous => [data.project, ...previous.filter(project => project.id !== data.project.id)]);
+    projectsChanged();
+  }
+  async function saveProject(event) {
+    event.preventDefault(); if (busy) return; setBusy(true); setNotice(null);
+    try {
+      const data = await api(form.id ? '/api/admin/projects/' + form.id : '/api/admin/projects', { method: form.id ? 'PUT' : 'POST', body: JSON.stringify(form) });
+      acceptSaved(data); setForm(null); setNotice({ type: 'success', text: 'Project saved. Your portfolio is up to date.' });
+    } catch (error) { setNotice({ type: 'error', text: error.message }); }
+    finally { setBusy(false); }
+  }
+  async function saveDemo(event) {
+    event.preventDefault(); if (busy) return; setBusy(true); setNotice(null);
+    try {
+      const data = await api('/api/admin/projects/' + demo.id + '/demo', { method: 'PATCH', body: JSON.stringify({ demo_url: demo.demo_url }) });
+      acceptSaved(data); setDemo(null); setNotice({ type: 'success', text: data.message + ' The public project list is up to date.' });
+    } catch (error) { setNotice({ type: 'error', text: error.message }); }
+    finally { setBusy(false); }
+  }
+  async function removeProject(project) {
+    if (!window.confirm('Permanently delete “' + project.title + '”?')) return;
+    setBusy(true); setNotice(null);
+    try { await api('/api/admin/projects/' + project.id, { method: 'DELETE' }); setProjects(previous => previous.filter(item => item.id !== project.id)); projectsChanged(); setNotice({ type: 'success', text: 'Project deleted.' }); }
+    catch (error) { setNotice({ type: 'error', text: error.message }); }
+    finally { setBusy(false); }
+  }
+  const status = notice && <div className={'studio-admin-notice ' + notice.type} role={notice.type === 'error' ? 'alert' : 'status'}>{notice.text}</div>;
+  if (!token) return <section className="studio-page studio-container studio-project-page"><div className="studio-admin-login"><p className="studio-eyebrow">PORTFOLIO STUDIO</p><h1>Welcome back.</h1><p>Sign in to publish projects, manage live demos, and read your messages.</p>{status}<form onSubmit={login}><fieldset disabled={busy}><label htmlFor="admin-user">Username</label><input id="admin-user" autoComplete="username" required value={credentials.username} onChange={event => setCredentials({ ...credentials, username: event.target.value })} /><label htmlFor="admin-password">Password</label><input id="admin-password" type="password" autoComplete="current-password" required value={credentials.password} onChange={event => setCredentials({ ...credentials, password: event.target.value })} /><button className="studio-button" type="submit">{busy ? 'Signing in…' : 'Sign in'}</button></fieldset></form></div></section>;
+  return <section className="studio-page studio-container studio-project-page studio-admin">
+    <div className="studio-section-head"><div><p className="studio-eyebrow">YOUR CONTENT, IN YOUR CONTROL</p><h1>Portfolio studio.</h1></div><div className="studio-actions"><Link className="studio-button secondary" to="/projects">View portfolio</Link><button className="studio-button secondary" onClick={logout}>Sign out</button></div></div>
+    <div className="studio-admin-tabs"><button aria-pressed={tab === 'projects'} onClick={() => { setTab('projects'); setNotice(null); }}>Projects <span>{loading || loadErrors.projects ? '—' : projects.length}</span></button><button aria-pressed={tab === 'messages'} onClick={() => { setTab('messages'); setNotice(null); }}>Messages <span>{loading || loadErrors.messages ? '—' : messages.length}</span></button></div>
+    {status}
+    {loading && <p role="status">Loading your studio…</p>}
+    {!loading && loadErrors[tab] && <div className="studio-admin-connection" role="alert"><div><h2>{tab === 'projects' ? 'Projects could not be loaded.' : 'Messages could not be loaded.'}</h2><p>{loadErrors[tab]}</p>{tab === 'projects' && <p>The <strong>Add demo</strong> button appears beside each loaded project. Once connected, paste your deployed app’s URL there and save it.</p>}</div><button className="studio-button secondary" disabled={busy} onClick={() => setReload(value => value + 1)}>Retry connection</button></div>}
+    {tab === 'projects' && !loadErrors.projects && !loading && projects.length > 0 && <p className="studio-admin-demo-help">To publish a demo, choose <strong>Add demo</strong> beside a project, enter its public URL, and save.</p>}
+    {tab === 'projects' && <>
+      <div className="studio-admin-toolbar"><label className="studio-admin-search">Search projects<input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Find a project…" /></label><button className="studio-button" onClick={() => { setForm({ ...emptyProject, case_study: {} }); setDemo(null); setNotice(null); }}>Add project</button></div>
+      {form && <div className="studio-editor"><div className="studio-section-head"><div><p className="studio-eyebrow">PROJECT EDITOR</p><h2>{form.id ? 'Refine the details.' : 'Share your next build.'}</h2></div><button className="studio-button secondary" disabled={busy} onClick={() => setForm(null)}>Cancel</button></div><form onSubmit={saveProject}><fieldset disabled={busy}><div className="studio-form-grid"><div><label htmlFor="project-title-input">Project title *</label><input id="project-title-input" autoFocus required maxLength={255} value={form.title} onChange={event => setForm({ ...form, title: event.target.value })} /></div><div><label htmlFor="project-tech">Technologies *</label><input id="project-tech" required maxLength={255} placeholder="React, NestJS, MySQL" value={form.technologies} onChange={event => setForm({ ...form, technologies: event.target.value })} /></div></div><label htmlFor="project-description">Short description *</label><textarea id="project-description" required maxLength={2000} rows={3} value={form.description} onChange={event => setForm({ ...form, description: event.target.value })} /><label htmlFor="project-story">The story behind the build</label><textarea id="project-story" maxLength={12000} rows={5} placeholder="What problem did you solve? What did you build, and what did you learn?" value={form.long_description || ''} onChange={event => setForm({ ...form, long_description: event.target.value })} /><section className="studio-admin-case-editor"><p className="studio-eyebrow">PROJECT CASE STUDY</p><h3>Show the thinking behind the work.</h3><p className="studio-note">Optional sections appear publicly only when filled in. Describe your own work and use results you can support.</p>{caseStudyFields.map(field => <div key={field.key}><label htmlFor={'case-' + field.key}>{field.label}</label><textarea id={'case-' + field.key} rows={field.key === 'role' ? 2 : 4} maxLength={1500} value={form.case_study?.[field.key] || ''} onChange={event => setForm({ ...form, case_study: { ...form.case_study, [field.key]: event.target.value } })} placeholder={field.prompt} /></div>)}<label className="studio-featured-checkbox"><input type="checkbox" checked={Boolean(form.featured)} onChange={event => setForm({ ...form, featured: event.target.checked })} /><span>Feature this project first on the homepage</span></label></section><div className="studio-form-grid"><div><label htmlFor="project-source">Source code URL</label><input id="project-source" inputMode="url" maxLength={2048} placeholder="https://github.com/you/project" value={form.link} onChange={event => setForm({ ...form, link: event.target.value })} /></div><div><label htmlFor="project-demo">Live demo URL</label><input id="project-demo" inputMode="url" maxLength={2048} placeholder="https://your-app.vercel.app" value={form.demo_url} onChange={event => setForm({ ...form, demo_url: event.target.value })} /></div></div><p className="studio-note">Use the published app or a video walkthrough. Leave the demo blank until it’s ready.</p><label htmlFor="project-image">Screenshot URL or local image filename</label><input id="project-image" maxLength={255} placeholder="https://… or bank.png" value={form.image_url} onChange={event => setForm({ ...form, image_url: event.target.value })} /><p className="studio-note">Use your actual application screenshot. Leave this blank for a project-specific interface concept.</p><div className="studio-admin-visual-preview"><ProjectVisual key={form.image_url} project={form} eager /></div>{form.image_url && <button type="button" className="studio-admin-reset-image" onClick={() => setForm({ ...form, image_url: '' })}>Use interface concept instead</button>}<div className="studio-actions"><button type="submit" className="studio-button">{busy ? 'Saving project…' : 'Save project'}</button></div></fieldset></form></div>}
+      {demo && <div className="studio-editor studio-demo-editor"><p className="studio-eyebrow">LIVE DEMO</p><h2>{demo.title}</h2><form onSubmit={saveDemo}><fieldset disabled={busy}><label htmlFor="quick-demo">Demo or walkthrough URL</label><input id="quick-demo" autoFocus inputMode="url" maxLength={2048} value={demo.demo_url} onChange={event => setDemo({ ...demo, demo_url: event.target.value })} placeholder="https://your-app.vercel.app" aria-describedby="quick-demo-help" /><p className="studio-note" id="quick-demo-help">Paste your published application URL. Clear the field and save to remove the demo.</p><div className="studio-actions"><button className="studio-button" type="submit">{busy ? 'Saving demo…' : 'Save demo'}</button><button className="studio-button secondary" type="button" onClick={() => setDemo(null)}>Cancel</button>{safeUrl(demo.demo_url) && <a className="studio-button secondary" href={safeUrl(demo.demo_url)} target="_blank" rel="noopener noreferrer">Test demo link</a>}</div></fieldset></form></div>}
+      <div className="studio-admin-projects">{projects.filter(project => (project.title + ' ' + project.technologies).toLowerCase().includes(query.toLowerCase())).map(project => <article className="studio-admin-project" key={project.id}><ProjectVisual key={project.image_url} project={project} className="studio-admin-thumbnail" /><div className="studio-admin-project-info"><h3>{project.title}</h3><p>{project.technologies}</p>{safeUrl(project.demo_url) ? <a className="studio-admin-demo-url" href={safeUrl(project.demo_url)} target="_blank" rel="noopener noreferrer">{project.demo_url}</a> : <span className="studio-note">No live demo yet</span>}</div><div className="studio-admin-project-actions"><button className="studio-button" disabled={busy} onClick={() => { setDemo({ id: project.id, title: project.title, demo_url: project.demo_url || '' }); setForm(null); setNotice(null); window.scrollTo({ top: 260, behavior: 'instant' }); }}>{safeUrl(project.demo_url) ? 'Edit demo' : 'Add demo'}</button><button className="studio-button secondary" disabled={busy} onClick={() => { setForm({ ...emptyProject, ...project, case_study: { ...(project.case_study || {}) } }); setDemo(null); setNotice(null); window.scrollTo({ top: 260, behavior: 'instant' }); }}>Edit project</button><button className="studio-admin-delete" disabled={busy} onClick={() => removeProject(project)}>Delete</button></div></article>)}</div>
+      {!loading && !loadErrors.projects && !projects.length && <div className="studio-empty"><h3>Your next project belongs here.</h3><p>Add a project, then attach its live demo when it’s ready to share.</p></div>}
+    </>}
+    {tab === 'messages' && <div className="studio-admin-messages">{messages.map(message => <article className="studio-editor" key={message.id}><p className="studio-eyebrow">{message.created_at ? new Date(message.created_at).toLocaleDateString() : 'MESSAGE'}</p><h2>{message.name}</h2><a href={'mailto:' + message.email}>{message.email}</a><p className="studio-message-body">{message.message}</p><a className="studio-button secondary" href={'mailto:' + message.email + '?subject=' + encodeURIComponent('Re: Your portfolio message')}>Reply by email</a></article>)}{!loading && !loadErrors.messages && !messages.length && <div className="studio-empty"><h3>Your inbox is clear.</h3><p>Messages from the contact form will appear here.</p></div>}</div>}
+  </section>;
 }
-
-export default Admin;

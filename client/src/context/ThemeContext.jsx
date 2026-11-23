@@ -4,13 +4,14 @@ const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
     const [theme, setTheme] = useState(() => {
-        return localStorage.getItem('ga_portfolio_theme') || 'dark';
+        try { const saved = localStorage.getItem('ga_portfolio_theme'); return saved === 'light' ? 'light' : 'dark'; } catch { return 'dark'; }
     });
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', theme);
         document.body.setAttribute('data-theme', theme);
-        localStorage.setItem('ga_portfolio_theme', theme);
+        document.documentElement.style.colorScheme = theme;
+        try { localStorage.setItem('ga_portfolio_theme', theme); } catch { /* Theme still works without persistent storage. */ }
     }, [theme]);
 
     const toggleTheme = () => {

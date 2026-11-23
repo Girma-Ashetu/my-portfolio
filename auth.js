@@ -1,20 +1,15 @@
 const jwt = require('jsonwebtoken');
+const { jwtSecret } = require('./admin-auth');
 require('dotenv').config();
-
-module.exports = (req, res, next) => {
-  // For demo purposes, we'll allow a dummy token or standard JWT
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-
-  if (!token) return res.status(401).json({ message: 'Access denied' });
-
-  if (token === 'dummy-token') return next();
-
-  try {
-    const verified = jwt.verify(token, process.env.JWT_SECRET || 'secret');
-    req.user = verified;
-    next();
-  } catch (err) {
-    res.status(400).json({ message: 'Invalid token' });
-  }
-};
+function createAuth(env = process.env) {
+  return (req, res, next) => {
+    const token = req.headers.authorization?.match(/^Bearer (.+)$/)?.[1];
+    if (!token) return res.status(401).json({ message: 'Access denied.' });
+    const secret = jwtSecret(env);
+    if (!secret) return res.status(503).json({ message: 'Administrator access is not configured.' });
+    try { req.user = jwt.verify(token, secret, { algorithms: ['HS256'] }); next(); }
+    catch { return res.status(401).json({ message: 'Your session has expired. Please sign in again.' }); }
+  };
+}
+module.exports = createAuth();
+module.exports.createAuth = createAuth;

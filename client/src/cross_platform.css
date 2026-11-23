@@ -1,0 +1,333 @@
+/* ════════════════════════════════════════════════════════════════════
+   CROSS-PLATFORM COMPATIBILITY & GLOBAL POLISH ENGINE
+   Targets: Safari, Firefox, Chrome, Edge — Mobile & Desktop
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. CSS CUSTOM PROPERTY FALLBACKS ──
+   color-mix() is not supported in Safari < 16.4. Provide static fallbacks
+   so cards / badges don't become transparent on older devices.         */
+
+/* Generic fallback for color-mix(in srgb, var(--primary) 10%, transparent) */
+.focus-card-glow,
+.cert-bg-glow,
+.exp-card-glow {
+    /* Static fallback */
+    background: rgba(94, 234, 212, 0.08);
+}
+
+/* ── 2. WEBKIT MASK-IMAGE PREFIX SAFETY NET ── */
+.grid-mesh,
+.bg-geometric-grid {
+    -webkit-mask-image: radial-gradient(circle at center, black, transparent 80%);
+    mask-image: radial-gradient(circle at center, black, transparent 80%);
+}
+
+.profile-img-container::before {
+    -webkit-mask-image: radial-gradient(circle, transparent 65%, black 66%);
+    mask-image: radial-gradient(circle, transparent 65%, black 66%);
+}
+
+/* ── 3. BACKDROP-FILTER SAFETY (Firefox < 103 had no support) ── */
+@supports not (backdrop-filter: blur(1px)) {
+
+    .glass-pane,
+    .glass-card,
+    .glass-card-master,
+    .glass-card-l7,
+    .interactive-terminal-card,
+    .gaia-panel,
+    .master-navbar,
+    .master-footer {
+        background: rgba(13, 18, 40, 0.97) !important;
+    }
+
+    [data-theme="light"] .glass-pane,
+    [data-theme="light"] .glass-card,
+    [data-theme="light"] .glass-card-master,
+    [data-theme="light"] .interactive-terminal-card {
+        background: rgba(248, 250, 252, 0.98) !important;
+    }
+}
+
+/* ── 4. DVH / SVH UNIT FALLBACKS (older Android / Safari 14-) ── */
+body {
+    min-height: 100vh;
+    /* fallback */
+    min-height: 100dvh;
+    /* modern */
+}
+
+#root {
+    min-height: 100vh;
+    /* fallback */
+    min-height: 100svh;
+    /* modern */
+}
+
+/* ── 5. SCROLL-BEHAVIOR SAFE FOR REDUCED-MOTION ── */
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto !important;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    /* Keep opacity transitions for theme switching */
+    [data-theme] {
+        transition: background-color 0.2s ease, color 0.2s ease !important;
+    }
+}
+
+/* ── 6. FOCUS-VISIBLE ACCESSIBILITY (keyboard nav outline) ── */
+:focus-visible {
+    outline: 2px solid var(--primary, #5eead4);
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+
+:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* ── 7. PREVENT FOUC (Flash of Unstyled Content) ON THEME SWITCH ── */
+[data-theme] {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ── 8. IMAGE RENDERING & LAZY-LOAD PLACEHOLDERS ── */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    /* Favor quality on high-DPI */
+    image-rendering: auto;
+    /* Smooth decode */
+    content-visibility: auto;
+}
+
+img[loading="lazy"] {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+/* ── 9. SAFE AREA INSETS FOR NOTCH PHONES (iPhone X+) ── */
+.master-navbar {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+}
+
+.master-footer {
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+}
+
+.gaia-fab {
+    bottom: calc(24px + env(safe-area-inset-bottom)) !important;
+    right: calc(24px + env(safe-area-inset-right)) !important;
+}
+
+.scroll-top-btn {
+    bottom: calc(90px + env(safe-area-inset-bottom)) !important;
+    right: calc(24px + env(safe-area-inset-right)) !important;
+}
+
+/* ── 10. SAFARI: TEXT INFLATION PREVENTION ── */
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+/* ── 11. FIREFOX: SCROLLBAR STYLING FALLBACK ── */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(94, 234, 212, 0.3) transparent;
+}
+
+[data-theme="light"] * {
+    scrollbar-color: rgba(15, 23, 42, 0.2) transparent;
+}
+
+/* ── 12. TOUCH DEVICE IMPROVEMENTS ── */
+@media (hover: none) and (pointer: coarse) {
+
+    /* Disable hover-only effects on touch devices */
+    .tilt-card-wrapper {
+        transform: none !important;
+    }
+
+    /* Increase tap targets for key interactive elements */
+    .master-nav-link,
+    .hero-social-link,
+    .btn-masterpiece-primary,
+    .btn-masterpiece-outline,
+    .footer-nav-link,
+    .email-provider-btn,
+    .preset-pill-btn,
+    .gaia-cat-tab,
+    .gaia-action-item {
+        min-height: 44px !important;
+        min-width: 44px !important;
+    }
+
+    /* Remove desktop-only 3D cursor animations */
+    .custom-cursor {
+        display: none !important;
+    }
+}
+
+/* ── 13. HIGH CONTRAST MODE SUPPORT ── */
+@media (forced-colors: active) {
+
+    .hero-name-gradient,
+    .text-gradient,
+    .gradient-text {
+        -webkit-text-fill-color: ButtonText;
+        background: none;
+    }
+
+    .glass-pane,
+    .glass-card-master,
+    .glass-card {
+        border: 1px solid ButtonText !important;
+    }
+
+    .reading-progress {
+        background: Highlight !important;
+    }
+}
+
+/* ── 14. PRINT STYLES ── */
+@media print {
+
+    .universe-background,
+    .universe-bg,
+    .master-navbar,
+    .gaia-fab,
+    .gaia-panel,
+    .scroll-top-btn,
+    .reading-progress,
+    #particleCanvas,
+    .bg-nebula-deep,
+    .bg-nebula-mid,
+    .bg-holographic-mist,
+    .aurora-glow,
+    .nebula-layer {
+        display: none !important;
+    }
+
+    body {
+        background: white !important;
+        color: black !important;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        color: black !important;
+        -webkit-text-fill-color: black !important;
+        text-shadow: none !important;
+    }
+
+    a {
+        color: black !important;
+        text-decoration: underline !important;
+    }
+
+    .glass-pane,
+    .glass-card,
+    .glass-card-master {
+        background: white !important;
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+    }
+}
+
+/* ── 15. PREVENT SCROLL ANCHORING JANK ── */
+* {
+    overflow-anchor: none;
+}
+
+/* ── 16. HERO GRADIENT TEXT — FIREFOX FIX ── */
+.hero-name-gradient,
+.text-gradient,
+.gradient-text {
+    background-clip: text !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    /* Firefox ≥ 113 supports background-clip: text natively */
+    color: transparent !important;
+}
+
+/* ── 17. SCROLLBAR CORNER ── */
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+/* ── 18. ULTRAWIDE SCREENS (2560px+) ── */
+@media (min-width: 2560px) {
+    .container {
+        max-width: 1400px !important;
+    }
+}
+
+@media (min-width: 3840px) {
+    html {
+        font-size: 22px;
+    }
+
+    .container {
+        max-width: 1800px !important;
+    }
+}
+
+/* ── 19. LAZY LOADING FOR OFF-SCREEN PAGE SECTIONS ── */
+@supports (content-visibility: auto) {
+
+    .home-section,
+    .stats-band,
+    .tech-marquee-wrapper,
+    .focus-section,
+    .skill-section {
+        content-visibility: auto;
+        contain-intrinsic-size: 0 500px;
+    }
+}
+
+/* ── 20. LIGHT MODE: NO FLICKER ON DARK BACKGROUNDS ── */
+[data-theme="light"] .universe-background,
+[data-theme="light"] .universe-bg,
+[data-theme="light"] .nebula-layer,
+[data-theme="light"] .aurora-glow,
+[data-theme="light"] .bg-nebula-deep,
+[data-theme="light"] .bg-nebula-mid,
+[data-theme="light"] .bg-holographic-mist,
+[data-theme="light"] .bg-data-streams,
+[data-theme="light"] .star-field {
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+/* ── 21. BETTER TEXT RENDERING FOR ALL PLATFORMS ── */
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
+}
+
+/* ── 22. OVERSCROLL BEHAVIOR ── */
+html {
+    overscroll-behavior: contain;
+}
+
+main {
+    overscroll-behavior-y: contain;
+}

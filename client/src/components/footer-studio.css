@@ -1,0 +1,29 @@
+.portfolio-footer{padding:0;background:var(--studio-surface);position:relative}
+.portfolio-footer>.studio-container{display:block}
+.footer-invitation{display:flex;align-items:center;justify-content:space-between;gap:32px;padding:58px 0 48px;border-bottom:1px solid var(--studio-line)}
+.footer-eyebrow{font-family:ui-monospace,monospace;font-size:.75rem!important;letter-spacing:.12em;color:var(--studio-accent)!important;margin:0 0 18px!important}
+.footer-invitation h2{margin:0;color:var(--studio-text);font-size:clamp(2rem,3.3vw,3rem);font-weight:550;line-height:1.18;letter-spacing:-.045em}
+.footer-invitation h2 span{font-family:Georgia,'Times New Roman',serif;font-style:italic;font-weight:400;color:var(--studio-accent)}
+.footer-invitation .studio-button{flex-shrink:0}
+.footer-main{display:grid;grid-template-columns:2.2fr 1fr 1fr 1.5fr;gap:36px;padding:48px 0}
+.portfolio-footer .studio-footer-brand{font-size:1.65rem;letter-spacing:-.055em;gap:12px}
+.portfolio-footer .studio-brand-mark{width:52px;height:52px}
+.portfolio-footer .footer-identity p{font-size:.95rem;line-height:1.85;margin:20px 0 18px}
+.footer-location{font-size:.8rem;color:var(--studio-muted);line-height:1.7;display:block}
+.portfolio-footer .footer-column{display:flex;flex-direction:column;align-items:flex-start;gap:12px;min-width:0}
+.footer-column h3{font-size:.85rem;font-weight:600;color:var(--studio-text);letter-spacing:.02em;margin:6px 0 10px;line-height:1.5}
+.portfolio-footer .footer-column a{font-size:.9rem;color:var(--studio-muted);text-decoration:none;line-height:1.6;padding:2px 0;transition:color .15s}
+.portfolio-footer a:hover{color:var(--studio-accent)}
+.portfolio-footer .footer-contact p{margin:0 0 8px;font-size:.875rem;line-height:1.8}
+.portfolio-footer .footer-contact .footer-email{color:var(--studio-text);overflow-wrap:anywhere;text-decoration:underline;text-underline-offset:6px;text-decoration-color:var(--studio-line)}
+.portfolio-footer .footer-contact>a:last-child{color:var(--studio-accent)}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;padding:24px 0;border-top:1px solid var(--studio-line)}
+.portfolio-footer .footer-bottom small{font-size:.8rem;flex-basis:auto;border:0;padding:0;margin:0;width:auto}
+.footer-bottom>span{font-size:.8rem}
+.footer-bottom>div{display:flex;align-items:center;gap:24px}
+.footer-bottom a,.footer-bottom button{font-size:.8rem;color:var(--studio-muted);text-decoration:none}
+.footer-bottom button{border:0;background:none;padding:8px 0;min-height:44px}
+.footer-bottom button:hover{color:var(--studio-accent)}
+@media(max-width:1000px){.footer-main{grid-template-columns:1.7fr 1fr 1fr;gap:32px}.footer-contact{grid-column:1/-1;padding-top:24px;border-top:1px solid var(--studio-line)}.portfolio-footer .footer-contact p br{display:none}}
+@media(max-width:700px){.footer-invitation{padding:40px 0;flex-direction:column;align-items:flex-start;gap:26px}.footer-invitation h2{font-size:2.2rem}.footer-main{grid-template-columns:1fr 1fr;gap:32px 24px;padding:36px 0}.footer-identity{grid-column:1/-1}.portfolio-footer .footer-identity p{margin-top:16px}.footer-column h3{margin-bottom:6px}.footer-bottom{align-items:flex-start;flex-direction:column;gap:12px;padding-block:24px}.footer-bottom>div{width:100%;justify-content:space-between}.portfolio-footer .footer-contact{gap:12px}}
+.portfolio-footer .footer-column a{min-height:44px;display:inline-flex;align-items:center}.portfolio-footer .footer-column{gap:4px}.footer-bottom a{min-height:44px;display:inline-flex;align-items:center}

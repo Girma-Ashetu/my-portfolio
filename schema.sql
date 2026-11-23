@@ -1,6 +1,5 @@
--- Create Database
-CREATE DATABASE IF NOT EXISTS portfolio_ga_v2;
-USE portfolio_ga_v2;
+-- Run against the database selected in DB_NAME (or selected in your SQL editor).
+-- Creates missing tables only; does not create credentials or delete data.
 
 -- Projects Table
 CREATE TABLE IF NOT EXISTS projects (
@@ -9,8 +8,11 @@ CREATE TABLE IF NOT EXISTS projects (
     description TEXT NOT NULL,
     long_description TEXT,
     technologies VARCHAR(255) NOT NULL,
-    link VARCHAR(255),
+    link VARCHAR(2048),
+    demo_url VARCHAR(2048),
     image_url VARCHAR(255),
+    case_study TEXT,
+    featured TINYINT(1) NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -29,7 +31,3 @@ CREATE TABLE IF NOT EXISTS admins (
     username VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL
 );
-
--- Insert initial admin (password: admin123 - should be hashed in production)
--- I will provide a script to hash and insert the admin properly later.
-INSERT INTO admins (username, password) VALUES ('admin', '$2a$10$7/l.r/1WzJ.pP.W.o8W.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.');
