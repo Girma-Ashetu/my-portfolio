@@ -1,7 +1,7 @@
 import { studentShowcase } from './studentShowcase';
 export const fallbackProjects = [
  { id: 1, title: 'Bank Management System', description: 'A desktop application for managing accounts, transactions, and account status in Ethiopian Birr.', technologies: 'Java, MySQL, Swing, JDBC', image_url: 'bank.png', link: 'https://github.com/Girma-Ashetu' },
- { id: 2, title: 'Developer Portfolio', description: 'A React portfolio with a project catalogue, content administration, and a contact workflow.', technologies: 'React, Node.js, Express, MySQL', image_url: 'portfolio-home-real.jpg', link: 'https://github.com/Girma-Ashetu/my-portfolio', demo_url: 'https://my-portfolio-67zerfy5v-ac-0af9.vercel.app/admin' },
+ { id: 2, title: 'Developer Portfolio', description: 'A React portfolio with a project catalogue, content administration, and a contact workflow.', technologies: 'React, Node.js, Express, MySQL', image_url: 'portfolio-home-real.jpg', link: 'https://github.com/Girma-Ashetu/my-portfolio', demo_url: 'https://my-portfolio1-theta-one.vercel.app/' },
  { id: 'student-records', ...studentShowcase },
  { id: 4, title: 'Vulnerability Scanner', description: 'A security project exploring common web vulnerabilities and actionable reporting.', technologies: 'Python, Security, React', image_url: 'cyber.png', link: 'https://github.com/Girma-Ashetu' },
  { id: 5, title: 'Mobile Marketplace', description: 'A cross-platform shopping application built with Flutter and Firebase.', technologies: 'Flutter, Firebase, Mobile', image_url: 'ecommerce.png', link: 'https://github.com/Girma-Ashetu' },
