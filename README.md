@@ -1,10 +1,12 @@
 # Girma Ashetu — Portfolio
 
+[Live portfolio](https://my-portfolio-ac-0af9.vercel.app) · [GitHub Pages portfolio](https://girma-ashetu.github.io/)
+
 A responsive React/Vite portfolio with a MySQL-backed project catalogue and an authenticated content studio. The main experience includes Home, About, Work, Skills, Contact, and Studio. NestJS, Django, and Angular are listed as frameworks currently being learned.
 
 ## Local development
 
-Install root and client dependencies if needed: `npm install` and `npm install --prefix client`.
+Use Node.js 24 and MySQL. Run npm ci from the repository root. The root postinstall script installs the client dependencies.
 
 Configure the root `.env` with your database connection and administrator credentials. Use `.env.example` as a reference without copying real secrets into source control.
 
