@@ -1,5 +1,5 @@
-import { lazy, Suspense, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useLocation, Link } from 'react-router-dom';
+import { lazy, Suspense, useEffect, useRef } from 'react';
+import { createBrowserRouter, RouterProvider, Routes, Route, useLocation, Link } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -13,13 +13,25 @@ const Experience = lazy(() => import('./pages/Experience'));
 const Achievements = lazy(() => import('./pages/Achievements'));
 const Contact = lazy(() => import('./pages/Contact'));
 const Admin = lazy(() => import('./pages/Admin'));
+function PageFocus() {
+ const { pathname } = useLocation();
+ const previous = useRef(pathname);
+ useEffect(() => {
+   if (previous.current === pathname) return;
+   previous.current = pathname;
+   const heading = document.querySelector('#main-content h1');
+   if (heading) { heading.tabIndex = -1; heading.focus({ preventScroll: true }); }
+ }, [pathname]);
+ return null;
+}
 function Content() {
  const { pathname } = useLocation();
  useEffect(() => { window.scrollTo(0, 0); const titles = { '/': 'Software Developer', '/about': 'About', '/projects': 'Selected Work', '/skills': 'Skills & Learning', '/contact': 'Contact', '/admin': 'Portfolio Studio' }; document.title = (titles[pathname] || 'Portfolio') + ' | Girma Ashetu Asefa'; }, [pathname]);
- return <><a className="studio-skip" href="#main-content">Skip to content</a><Navbar /><main id="main-content"><Suspense fallback={<div className="studio-loading" role="status">Loading page…</div>}><Routes>
+ return <><a className="studio-skip" href="#main-content">Skip to content</a><Navbar /><main id="main-content" tabIndex={-1}><Suspense fallback={<div className="studio-loading" role="status">Loading page…</div>}><Routes>
  <Route path="/" element={<Home />} /><Route path="/projects" element={<Projects />} />
  <Route path="/about" element={<About />} /><Route path="/skills" element={<Skills />} /><Route path="/contact" element={<Contact />} /><Route path="/admin" element={<Admin />} /><Route element={<LegacyLayout />}><Route path="/certifications" element={<Certifications />} /><Route path="/experience" element={<Experience />} /><Route path="/achievements" element={<Achievements />} /></Route>
  <Route path="*" element={<section className="studio-container studio-project-page"><h1>Page not found</h1><Link to="/">Return home</Link></section>} />
- </Routes></Suspense></main><Footer /></>;
+ </Routes><PageFocus /></Suspense></main><Footer /></>;
 }
-export default function App() { return <ThemeProvider><BrowserRouter><Content /></BrowserRouter></ThemeProvider>; }
+const router = createBrowserRouter([{ path: '*', element: <Content /> }]);
+export default function App() { return <ThemeProvider><RouterProvider router={router} /></ThemeProvider>; }

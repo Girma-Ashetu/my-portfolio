@@ -4,7 +4,7 @@ import './certifications.css';
 function TiltCard({ children, className }) {
   const ref = useRef(null);
   const onMove = (e) => {
-    if (!ref.current) return;
+    if (!ref.current || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const r = ref.current.getBoundingClientRect();
     const x = ((e.clientX - r.left) / r.width - 0.5) * 10;
     const y = ((e.clientY - r.top) / r.height - 0.5) * -10;
@@ -59,7 +59,7 @@ function Certifications() {
             <i className="fas fa-certificate" />
           </div>
           <span className="certs-chip">Professional Credentials</span>
-          <h2 className="certs-title">Certifications &amp; <span className="text-gradient">Learning Path</span></h2>
+          <h1 className="certs-title">Certifications &amp; <span className="text-gradient">Learning Path</span></h1>
           <p className="certs-sub">
             Globally recognised industry certifications that validate expertise and demonstrate a commitment to continuous professional growth.
           </p>

@@ -1,4 +1,15 @@
+@layer accessibility {
+  [data-theme=light] .legacy-content .cert-status-pill.in-progress { color:#075985 !important; }
+  [data-theme=light] .legacy-content .roadmap-texts small,
+  [data-theme=light] .legacy-content .exp-period-tag { color:#52685d !important; }
+  [data-theme=light] .legacy-content .exp-org-chip { color:#255c43 !important; background:#eef5f0 !important; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+    .tilt-card-wrapper { transform:none !important; }
+  }
+}
 :root {
+  --studio-error:#ffb4a8;
   --studio-bg:#101715; --studio-surface:#18221e; --studio-raised:#202e27;
   --studio-text:#f0f6f2; --studio-muted:#b0bfb6; --studio-line:#34463b;
   --studio-accent:#c9eea5; --studio-button:#c9eea5; --studio-button-text:#172a1d;
@@ -8,6 +19,7 @@
   --font-heading:system-ui,sans-serif; --font-body:system-ui,sans-serif; color-scheme:dark;
 }
 :root[data-theme=light] {
+  --studio-error:#9b2c24;
   --studio-bg:#f5f8f6; --studio-surface:#ffffff; --studio-raised:#eaf1ec;
   --studio-text:#1a3026; --studio-muted:#52685d; --studio-line:#d2dfd6; --studio-accent:#2c6244;
   --studio-button:#28563d; --studio-button-text:#ffffff;

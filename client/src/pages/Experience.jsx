@@ -4,7 +4,7 @@ import './experience.css';
 function TiltCard({ children }) {
   const ref = useRef(null);
   const onMove = (e) => {
-    if (!ref.current) return;
+    if (!ref.current || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const r = ref.current.getBoundingClientRect();
     const x = ((e.clientX - r.left) / r.width - 0.5) * 8;
     const y = ((e.clientY - r.top) / r.height - 0.5) * -8;
@@ -96,7 +96,7 @@ function Experience() {
             <i className="fas fa-briefcase" />
           </div>
           <span className="exp-page-chip">Professional Journey</span>
-          <h2 className="exp-page-title">Experience &amp; <span className="text-gradient">Background</span></h2>
+          <h1 className="exp-page-title">Experience &amp; <span className="text-gradient">Background</span></h1>
           <p className="exp-page-sub">
             Building a solid foundation through academic projects, team collaboration, intensive research, and continuous hands-on software development.
           </p>
