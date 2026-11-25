@@ -19,7 +19,7 @@ function useCounter(target, duration = 2000) {
   useEffect(() => {
     if (!started) return;
     const numeric = parseInt(String(target).replace(/\D/g, ''), 10);
-    const suffix = String(target).replace(/[0-9]/g, '');
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setCount(numeric); return; }
     let start = 0;
     const step = numeric / (duration / 16);
     const timer = setInterval(() => {
@@ -36,7 +36,7 @@ function useCounter(target, duration = 2000) {
 function TiltCard({ children }) {
   const ref = useRef(null);
   const m = (e) => {
-    if (!ref.current) return;
+    if (!ref.current || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const r = ref.current.getBoundingClientRect();
     const x = ((e.clientX - r.left) / r.width - 0.5) * 8;
     const y = ((e.clientY - r.top) / r.height - 0.5) * -8;
@@ -106,7 +106,7 @@ function Achievements() {
             <i className="fas fa-trophy" />
           </div>
           <span className="achieve-chip">Milestones</span>
-          <h2 className="achieve-title">Achievements &amp; <span className="text-gradient">Growth</span></h2>
+          <h1 className="achieve-title">Achievements &amp; <span className="text-gradient">Growth</span></h1>
           <p className="achieve-sub">
             A track record of consistent academic and technical accomplishments demonstrating capability, discipline, and dedication.
           </p>

@@ -6,7 +6,7 @@ import { projectCategories, projectType } from '../data/projectArtwork';
 import { caseStudySections, prioritizeProjects } from '../data/caseStudies';
 import { loadProjects, peekProjects, subscribeProjects, invalidateProjects, PROJECTS_UPDATED } from '../data/projectStore';
 
-function ProjectDetails({ project, onClose }) {
+export function ProjectDetails({ project, onClose, preview = false }) {
   const dialog = useRef(null);
   const opener = useRef(document.activeElement);
   useEffect(() => {
@@ -23,7 +23,7 @@ function ProjectDetails({ project, onClose }) {
   return <dialog ref={dialog} className="studio-dialog" aria-labelledby="project-title" onCancel={onClose} onClick={event => { if (event.target === dialog.current) onClose(); }}>
     <button className="studio-close" onClick={onClose} aria-label="Close project details">×</button>
     <ProjectVisual project={project} className="studio-dialog-image" eager />
-    <div className="studio-dialog-body"><p className="studio-eyebrow">{sections.length ? 'PROJECT CASE STUDY' : 'BEHIND THE BUILD'}</p><h2 id="project-title">{project.title}</h2><p className="studio-detail-description">{project.long_description || project.description}</p><div className="studio-tags">{String(project.technologies || '').split(',').filter(Boolean).map(tech => <span key={tech}>{tech.trim()}</span>)}</div><div className="studio-actions">{demo && <a className="studio-button" href={demo} target="_blank" rel="noopener noreferrer">Try live demo</a>}{source && <a className="studio-button secondary" href={source} target="_blank" rel="noopener noreferrer">{new URL(source).pathname.replace(/\/$/, '') === '/Girma-Ashetu' ? 'GitHub profile' : 'View source code'}</a>}</div>{!demo && <p className="studio-note">A public demo is not available for this project yet.</p>}{sections.length > 0 && <div className="studio-case-study">{sections.map(section => <section key={section.key}><h3>{section.label}</h3><p>{section.content}</p></section>)}</div>}</div>
+    <div className="studio-dialog-body"><p className="studio-eyebrow">{preview ? 'UNSAVED PREVIEW · NOT PUBLISHED' : sections.length ? 'PROJECT CASE STUDY' : 'BEHIND THE BUILD'}</p><h2 id="project-title">{project.title}</h2><p className="studio-detail-description">{project.long_description || project.description}</p><div className="studio-tags">{String(project.technologies || '').split(',').filter(Boolean).map(tech => <span key={tech}>{tech.trim()}</span>)}</div><div className="studio-actions">{demo && <a className="studio-button" href={demo} target="_blank" rel="noopener noreferrer">Try live demo</a>}{source && <a className="studio-button secondary" href={source} target="_blank" rel="noopener noreferrer">{new URL(source).pathname.replace(/\/$/, '') === '/Girma-Ashetu' ? 'GitHub profile' : 'View source code'}</a>}</div>{!demo && <p className="studio-note">A public demo is not available for this project yet.</p>}{sections.length > 0 && <div className="studio-case-study">{sections.map(section => <section key={section.key}><h3>{section.label}</h3><p>{section.content}</p></section>)}</div>}</div>
   </dialog>;
 }
 function matches(project, filter) {

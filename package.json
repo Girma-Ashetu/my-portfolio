@@ -11,7 +11,7 @@
     "build": "npm run build --prefix client",
     "postinstall": "npm ci --prefix client",
     "db:migrate": "node scripts/migrate-projects.cjs",
-    "test": "node --test tests/project-fields.test.cjs tests/project-api.test.cjs tests/project-schema.test.cjs tests/admin-auth.test.cjs tests/contact-handler.test.cjs tests/project-store.test.cjs tests/project-artwork.test.cjs tests/project-case-study.test.cjs tests/studio-loader.test.cjs tests/deployment.test.cjs",
+    "test": "node --test tests/project-fields.test.cjs tests/project-api.test.cjs tests/project-schema.test.cjs tests/admin-auth.test.cjs tests/contact-handler.test.cjs tests/contact-validation.test.cjs tests/project-store.test.cjs tests/project-artwork.test.cjs tests/project-case-study.test.cjs tests/studio-loader.test.cjs tests/deployment.test.cjs",
     "verify:demos": "node scripts/verify-demos.cjs",
     "showcase:student": "node scripts/update-student-showcase.cjs",
     "check:deploy": "node scripts/check-deployment.cjs",
